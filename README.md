@@ -1,17 +1,14 @@
 # Đồ án Tổng hợp - Hướng TTNT: Bộ phân tích Petri Net
 ## Giới thiệu
-Dự án này được phát triển nhằm xây dựng một **công cụ trực quan hóa và phân tích Petri Net**, hỗ trợ học tập và nghiên cứu các hệ thống **song song, phân tán và bất đồng bộ**.
+Dự án này được phát triển nhằm xây dựng một **công cụ trực quan hóa và phân tích Petri net**, hỗ trợ trong học tập và nghiên cứu.
 
-- **Lý do chọn đề tài:**  
-  - Các hệ thống hiện đại cần được mô hình hóa và phân tích để phát hiện kịp thời tình trạng tắc nghẽn, deadlock, tiêu tốn tài nguyên.  
-  - Petri Net là công cụ hình thức mạnh mẽ, trực quan, có thể mô phỏng và phân tích hành vi của hệ thống.  
-  - Dự án kết hợp lý thuyết với ứng dụng thực tiễn, tận dụng thư viện và công nghệ hiện đại.  
+- Lý do chọn đề tài
+    Mong muốn xây dựng một công cụ học thuật, mã nguồn mở, dễ tiếp cận và đủ mạnh để thực hành các phân tích cơ bản trên Petri net
 
-- **Mục đích:**  
-  - Củng cố kiến thức về Petri Net và các tính chất quan trọng.  
-  - Hiện thực các thuật toán phân tích: Reachability Graph, Deadlock, Siphons, Traps, Liveness, Boundedness.  
-  - Xây dựng giao diện trực quan, thân thiện để hỗ trợ người dùng trong mô hình hóa và phân tích.  
-
+- Mục tiêu
+    Xây dựng công cụ trực quan hỗ trợ học và giảng dạy Petri Net.
+    Cài đặt các thuật toán phân tích: Reachability Graph, Deadlock Detection, Siphons & Traps, Liveness, Boundedness.
+    Phát triển hệ thống mã nguồn mở, có thể mở rộng và tích hợp vào các dự án nghiên cứu sau này.
 ---
 
 ## Chức năng chính
@@ -47,7 +44,8 @@ GVHD: **TS. Trịnh Văn Giang**
 ---
 
 ## Tiến độ (sẽ cập nhật)
-- Tuần 1–2: Nghiên cứu lý thuyết, viết đặc tả đề tài.  
+- Tuần 1–2: Nghiên cứu lý thuyết, viết đặc tả đề tài.
+- Tuần 3-5: Nghiên cứu thuật toán, viết mã giả.  
 
 ---
 
