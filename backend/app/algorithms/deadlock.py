@@ -4,24 +4,33 @@ Deadlock = marking mà không có transition nào enabled.
 """
 
 from typing import List, Dict, Tuple, Any
-from app.algorithms.reachability import reachability_graph, enabled
+from .reachability import reachability_analysis, enabled
 
 
 def deadlock_detection(
-    P: List[str],
-    T: List[str],
-    F: List[Tuple[str, str]],
-    W: Dict[Tuple[str, str], int],
-    M0: Dict[str, int]
+    places: List[str],
+    transitions: List[str],
+    arcs: List[Tuple[str, str]],
+    weights: Dict[str, int],
+    initial_marking: Dict[str, int]
 ) -> Dict[str, Any]:
     """
     Xác định tất cả các marking gây deadlock trong mạng Petri.
     """
-    V, E = reachability_graph(P, T, F, W, M0)
-    deadlocks = [M for M in V if not enabled(M, T, F, W)]
-
+    # Build reachability graph
+    rg_data = reachability_analysis(places, transitions, arcs, weights, initial_marking)
+    
+    states = rg_data['states']
+    deadlocks = []
+    
+    # Find states with no enabled transitions
+    for marking in states:
+        has_enabled = any(enabled(marking, t, arcs, weights) for t in transitions)
+        if not has_enabled:
+            deadlocks.append(marking)
+    
     return {
-        "total_states": len(V),
-        "total_deadlocks": len(deadlocks),
-        "deadlock_markings": deadlocks
+        'total_states': len(states),
+        'total_deadlocks': len(deadlocks),
+        'deadlock_markings': deadlocks,
     }
