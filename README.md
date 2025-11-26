@@ -1,58 +1,134 @@
-# Đồ án Tổng hợp - Hướng TTNT: Bộ phân tích Petri Net
-## Giới thiệu
-Dự án này được phát triển nhằm xây dựng một **công cụ trực quan hóa và phân tích Petri Net**, hỗ trợ học tập và nghiên cứu các hệ thống **song song, phân tán và bất đồng bộ**.
+# Petri Net Analyzer
 
-- **Lý do chọn đề tài:**  
-  - Các hệ thống hiện đại cần được mô hình hóa và phân tích để phát hiện kịp thời tình trạng tắc nghẽn, deadlock, tiêu tốn tài nguyên.  
-  - Petri Net là công cụ hình thức mạnh mẽ, trực quan, có thể mô phỏng và phân tích hành vi của hệ thống.  
-  - Dự án kết hợp lý thuyết với ứng dụng thực tiễn, tận dụng thư viện và công nghệ hiện đại.  
+Ứng dụng web phân tích và mô phỏng Petri Net với giao diện trực quan.
 
-- **Mục đích:**  
-  - Củng cố kiến thức về Petri Net và các tính chất quan trọng.  
-  - Hiện thực các thuật toán phân tích: Reachability Graph, Deadlock, Siphons, Traps, Liveness, Boundedness.  
-  - Xây dựng giao diện trực quan, thân thiện để hỗ trợ người dùng trong mô hình hóa và phân tích.  
+## Tính năng chính
 
----
+### 🎨 Vẽ và chỉnh sửa Petri Net
+- Giao diện kéo thả trực quan với React Flow
+- Các công cụ vẽ: Place, Transition, Arc, Token
+- Undo/Redo
+- Import/Export PNML và JSON
 
-## Chức năng chính
-- Vẽ sơ đồ Petri Net (thêm, xóa place, transition, arc, token).  
-- Undo/Redo thao tác.  
-- Mô phỏng firing, hiển thị token di chuyển.  
-- Nhập/Chỉnh sửa từ file PNML, JSON.  
-- Xuất file PNG, PNML, SVG, JSON.  
-- Xây dựng Reachability Graph, highlight trạng thái deadlock.  
-- Phân tích Siphons, Traps (bao gồm tối thiểu).  
-- Phân tích tính Liveness và Boundedness.  
+### 📊 Phân tích
+- **Reachability Graph**: Xây dựng và hiển thị đồ thị khả đạt
+- **Deadlock Detection**: Phát hiện các trạng thái deadlock
+- **Boundedness**: Kiểm tra tính bounded bằng Coverability Tree
+- **Liveness**: Phân loại mức độ sống của transitions
+- **Siphons & Traps**: Tìm minimal siphons và traps
 
----
+### ▶️ Mô phỏng
+- Fire transitions thủ công
+- Auto-play mode
+- Tracking firing history
+- Hiển thị enabled transitions real-time
+
+### 🎨 Visualization
+- Graphviz rendering cho RG và Coverability Tree
+- Export PNG/SVG
+- Interactive zoom và pan
+
+## Cài đặt
+
+### Backend
+
+```bash
+cd backend
+
+# Cài đặt Graphviz
+# Ubuntu: sudo apt-get install graphviz
+# macOS: brew install graphviz
+# Windows: Download từ https://graphviz.org/download/
+
+# Cài đặt Python dependencies
+pip install -r requirements.txt
+
+# Chạy server
+uvicorn app.main:app --reload
+```
+
+Backend API: http://127.0.0.1:8000
+
+### Frontend
+
+```bash
+cd frontend
+
+# Cài đặt dependencies
+npm install
+
+# Chạy development server
+npm start
+```
+
+Frontend: http://localhost:3000
+
+## Cấu trúc dự án
+
+```
+petri-analyzer/
+├── backend/                 # FastAPI backend
+│   ├── app/
+│   │   ├── algorithms/     # Thuật toán phân tích
+│   │   ├── api/            # REST API endpoints
+│   │   ├── core/           # Configuration & schemas
+│   │   └── utils/          # Helper functions
+│   └── requirements.txt
+│
+├── frontend/               # React frontend
+│   ├── src/
+│   │   ├── components/    # UI components
+│   │   ├── hooks/         # State management
+│   │   └── services/      # API client
+│   └── package.json
+│
+├── docs/                  # Tài liệu thiết kế
+└── README.md
+```
 
 ## Công nghệ sử dụng
-- **Backend:** Python, thư viện [SNAKES](https://pypi.org/project/snakes/), NumPy, SymPy.  
-- **Frontend:** React.js, React Flow, Tailwind CSS.  
-- **Trực quan hóa:** Graphviz (tạo ảnh tĩnh Reachability Graph).  
-- **Trao đổi dữ liệu:** API REST (JSON).  
-- **Định dạng file hỗ trợ:** PNML, JSON.  
 
----
+**Frontend:**
+- React 18
+- React Flow - Canvas visualization
+- Tailwind CSS - Styling
+- Zustand - State management
+- Axios - API client
 
-## Nhóm thực hiện
-- Nguyễn Nhật Thiên Hữu - 2311382  
-- Trần Huỳnh Hạ Lam - 2311805  
-- Nguyễn Tấn Lộc - 2311957  
-- Huỳnh Cẩm Ly - 2312008  
-- Nguyễn Lê Thảo Ly - 2312010  
+**Backend:**
+- FastAPI - Web framework
+- Pydantic - Data validation
+- Graphviz - Graph visualization
+- lxml - PNML parsing
 
-GVHD: **TS. Trịnh Văn Giang**  
+## Thuật toán
 
----
+- **Algorithm 1**: Reachability Graph Construction
+- **Algorithm 2**: Deadlock Detection
+- **Algorithm 3**: Siphons & Traps (CSP-based)
+- **Algorithm 4**: Coverability Tree
+- **Algorithm 5**: Tarjan SCC
+- **Algorithm 6**: Liveness Classification
 
-## Tiến độ (sẽ cập nhật)
-- Tuần 1–2: Nghiên cứu lý thuyết, viết đặc tả đề tài.  
+## Tài liệu
 
----
+Xem thêm chi tiết trong thư mục `docs/`:
+- `00_PROJECT_STRUCTURE.md` - Cấu trúc dự án
+- `01_NAMING_CONVENTION.md` - Quy tắc đặt tên
+- `02_API_SPEC.md` - API specification
+- `03_DATA_SCHEMA.md` - Data schema
+- `04_PLAN_DESIGN.md` - Thiết kế chi tiết
+- `05_WIREFRAME.md` - Wireframe UI/UX
 
-## Cách chạy (sẽ cập nhật)
-```bash
-git clone https://github.com/lamtranhuynhha/petri-analyzer.git
-# Hướng dẫn cài đặt và chạy sẽ bổ sung sau
+## License
 
+MIT
+
+## Đóng góp
+
+Mọi đóng góp đều được chào đón! Vui lòng tạo issue hoặc pull request.
+
+## Liên hệ
+
+- Repository: https://github.com/yourusername/petri-analyzer
+- Documentation: https://github.com/yourusername/petri-analyzer/wiki

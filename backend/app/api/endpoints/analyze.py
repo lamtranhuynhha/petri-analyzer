@@ -1,7 +1,7 @@
 """
 analyze.py
 ------------
-Các API phân tích Petri Net (deadlock, reachability, v.v.)
+Các API phân tích Petri Net (reachability, deadlock, boundedness, liveness, siphons-traps)
 """
 
 from fastapi import APIRouter, HTTPException
@@ -19,6 +19,31 @@ from app.algorithms.reachability import analyze_reachability
 from app.algorithms.boundedness import analyze_boundedness
 
 router = APIRouter(prefix="/analyze", tags=["Analysis"])
+
+
+def convert_arcs(request: PetriNetRequest):
+    """Helper to convert request arcs to tuple format"""
+    return [tuple(edge) for edge in request.arcs]
+
+
+@router.post("/reachability", response_model=ReachabilityResult)
+def analyze_reachability(request: PetriNetRequest):
+    """
+    Xây dựng Reachability Graph
+    """
+    try:
+        P = request.places
+        T = request.transitions
+        F = convert_arcs(request)
+        W = request.weights
+        M0 = request.initial_marking
+        
+        result = reachability_analysis(P, T, F, W, M0)
+        
+        return ReachabilityResult(result=result)
+    
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Error analyzing reachability: {str(e)}")
 
 
 @router.post("/deadlock", response_model=DeadlockResult)
