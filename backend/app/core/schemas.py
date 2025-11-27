@@ -27,15 +27,6 @@ class ReachabilityResult(BaseModel):
     graph_image: Optional[str] = Field(None, description="Ảnh đồ thị dạng base64")
 
 
-class ReachabilityResult(BaseModel):
-    """
-    Kết quả phân tích Reachability Graph
-    """
-    type: str = "reachability"
-    success: bool = True
-    result: Dict[str, Any]
-
-
 class DeadlockResult(BaseModel):
     """
     Kết quả phát hiện deadlock
