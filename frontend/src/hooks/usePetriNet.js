@@ -431,7 +431,7 @@ const usePetriNetStore = create((set, get) => ({
   
   // ============ HELPERS ============
   
-  getPetriNetData: () => {
+  getPetriNet: () => {
     const state = get();
     return {
       places: state.places.map(p => p.id),
@@ -441,6 +441,29 @@ const usePetriNetStore = create((set, get) => ({
       initial_marking: state.initialMarking,
     };
   },
+  getPetriNetData: () => {
+  const state = get();
+  return {
+    places: state.places.map(p => ({
+      id: p.id,
+      label: p.label,
+      position: p.position || { x: 0, y: 0 },
+    })),
+    transitions: state.transitions.map(t => ({
+      id: t.id,
+      label: t.label,
+      position: t.position || { x: 0, y: 0 },
+    })),
+    arcs: state.arcs.map(a => ({
+      source: a.source,
+      target: a.target //,
+      // weight: state.weights[JSON.stringify([a.source, a.target])] || 1,
+    })),
+    weights: state.weights,
+    initial_marking: state.initialMarking,
+  };
+}
+
   
 }));
 

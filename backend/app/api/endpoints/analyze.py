@@ -18,8 +18,9 @@ from app.algorithms.deadlock import deadlock_detection
 from app.algorithms.boundedness import boundedness_analysis
 from app.algorithms.liveness import liveness_analysis
 from app.algorithms.siphons_traps import siphons_traps_analysis
+# from utils.json_converter import convert_to_backend_format
 
-router = APIRouter(prefix="/analyze", tags=["Analysis"])
+router = APIRouter(prefix="/api/analyze", tags=["Analysis"])
 
 
 def convert_arcs(request: PetriNetRequest):

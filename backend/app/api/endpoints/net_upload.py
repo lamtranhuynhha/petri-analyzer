@@ -18,7 +18,7 @@ import json
 import io
 from typing import Dict, Any
 
-router = APIRouter(prefix="/net", tags=["File Operations"])
+router = APIRouter(prefix="/api/net", tags=["File Operations"]) #
 
 
 @router.post("/upload", response_model=UploadFileResponse)
