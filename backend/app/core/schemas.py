@@ -65,16 +65,5 @@ class SiphonTrapResult(BaseModel):
     traps: List[List[str]] = Field(..., description="Danh sách các trap tìm được")
     minimal_traps: List[List[str]] = Field(..., description="Các trap tối thiểu")
 
-
-class AnalysisResponse(BaseModel):
-    """
-    Phản hồi kết quả phân tích
-    """
-    status: str = Field(..., description="Trạng thái phản hồi (ok hoặc error)")
-    message: Optional[str] = Field(None, description="Thông báo bổ sung")
-    data: Optional[Dict[str, Any]] = Field(None, description="Dữ liệu kết quả")
-
-
-# Alias cho tương thích ngược
 BoundednessResult = BoundednessLivenessResult
 LivenessResult = BoundednessLivenessResult

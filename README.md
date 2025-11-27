@@ -1,14 +1,15 @@
-# Petri Net Analyzer
+# Đồ án Tổng hợp - Hướng TTNT: Bộ phân tích Petri Net
+## Giới thiệu
+Dự án này được phát triển nhằm xây dựng một **công cụ trực quan hóa và phân tích Petri net**, hỗ trợ trong học tập và nghiên cứu.
 
-Ứng dụng web phân tích và mô phỏng Petri Net với giao diện trực quan.
+- Lý do chọn đề tài
+    Mong muốn xây dựng một công cụ học thuật, mã nguồn mở, dễ tiếp cận và đủ mạnh để thực hành các phân tích cơ bản trên Petri net
 
-## Tính năng chính
-
-### 🎨 Vẽ và chỉnh sửa Petri Net
-- Giao diện kéo thả trực quan với React Flow
-- Các công cụ vẽ: Place, Transition, Arc, Token
-- Undo/Redo
-- Import/Export PNML và JSON
+- Mục tiêu
+    Xây dựng công cụ trực quan hỗ trợ học và giảng dạy Petri Net.
+    Cài đặt các thuật toán phân tích: Reachability Graph, Deadlock Detection, Siphons & Traps, Liveness, Boundedness.
+    Phát triển hệ thống mã nguồn mở, có thể mở rộng và tích hợp vào các dự án nghiên cứu sau này.
+---
 
 ### 📊 Phân tích
 - **Reachability Graph**: Xây dựng và hiển thị đồ thị khả đạt
@@ -110,25 +111,16 @@ petri-analyzer/
 - **Algorithm 5**: Tarjan SCC
 - **Algorithm 6**: Liveness Classification
 
-## Tài liệu
-
-Xem thêm chi tiết trong thư mục `docs/`:
-- `00_PROJECT_STRUCTURE.md` - Cấu trúc dự án
-- `01_NAMING_CONVENTION.md` - Quy tắc đặt tên
-- `02_API_SPEC.md` - API specification
-- `03_DATA_SCHEMA.md` - Data schema
-- `04_PLAN_DESIGN.md` - Thiết kế chi tiết
-- `05_WIREFRAME.md` - Wireframe UI/UX
+## Tiến độ (sẽ cập nhật)
+- Tuần 1–2: Nghiên cứu lý thuyết, viết đặc tả đề tài.
+- Tuần 3-4: Nghiên cứu thuật toán, viết mã giả.  
+- Tuần 5-6: Hiện thực thuật toán, kiểm thử.
+- Tuần 7: Tích hợp các thuật toán, kiểm thử.
+- Tuần 8-8: Hiện thực frontend.
+- Tuần 10-11: Hiện thực backend, tích hợp API.
+- Tuần 12: Hoàn thiện báo cáo, demo.
 
 ## License
 
 MIT
 
-## Đóng góp
-
-Mọi đóng góp đều được chào đón! Vui lòng tạo issue hoặc pull request.
-
-## Liên hệ
-
-- Repository: https://github.com/yourusername/petri-analyzer
-- Documentation: https://github.com/yourusername/petri-analyzer/wiki
