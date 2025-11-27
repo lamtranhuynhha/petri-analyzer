@@ -3,7 +3,7 @@ schemas.py
 Khai báo các cấu trúc dữ liệu cho API (Pydantic models)
 """
 
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Union
 from pydantic import BaseModel, Field
 
 
@@ -56,6 +56,49 @@ class SiphonTrapResult(BaseModel):
     minimal_siphons: List[List[str]] = Field(..., description="Các siphon tối thiểu")
     traps: List[List[str]] = Field(..., description="Danh sách các trap tìm được")
     minimal_traps: List[List[str]] = Field(..., description="Các trap tối thiểu")
+
+class UploadFileResponse(BaseModel):
+    """
+    Response khi upload file
+    """
+    status: str = "success"
+    message: str
+    data: Dict[str, Any]
+
+
+class ExportRequest(BaseModel):
+    """
+    Request để export Petri Net
+    """
+    net_data: Dict[str, Any]
+    format: str  # 'pnml', 'json', 'png', 'svg'
+
+
+class ConvertRequest(BaseModel):
+    """
+    Request để convert format
+    """
+    input_format: str
+    output_format: str
+    data: Union[str, Dict[str, Any]]
+
+
+class VisualizationRequest(BaseModel):
+    """
+    Request để generate visualization
+    """
+    data: Dict[str, Any]  # RG data, tree data, or net data
+    format: str = "svg"  # 'png' or 'svg'
+
+
+class ErrorResponse(BaseModel):
+    """
+    Standard error response
+    """
+    status: str = "error"
+    message: str
+    details: Optional[Any] = None
+
 
 BoundednessResult = BoundednessLivenessResult
 LivenessResult = BoundednessLivenessResult
