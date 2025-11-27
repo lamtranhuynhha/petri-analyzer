@@ -54,14 +54,6 @@ class TestDeadlock:
         print(f"✓ Deadlock net: {result.total_deadlocks} deadlocks")
         print(f"  Deadlock markings: {result.deadlock_markings}")
     
-    # def test_mutual_exclusion_no_deadlock(self, mutual_exclusion_net):
-    #     """Test mạng Mutual Exclusion - không có deadlock nếu thiết kế đúng"""
-    #     result = analyze_deadlock(mutual_exclusion_net)
-        
-    #     assert result is not None
-        
-    #     print(f"✓ Mutual Exclusion: {result.total_deadlocks} deadlocks in {result.total_states} states")
-    
     def test_empty_net_is_deadlock(self, empty_net):
         """Test edge case: mạng rỗng - initial state là deadlock"""
         result = analyze_deadlock(empty_net)
