@@ -216,13 +216,21 @@ def analyze_liveness(request: PetriNetRequest) -> BoundednessLivenessResult:
     dead_transitions = []
     unreachable_transitions = []
     live_transitions = []
+    liveness_level = 4  # Mặc định là mức cao nhất
     
     for transition, (is_dead, is_L1, is_L2, is_L3, is_L4) in liveness_table.items():
         if is_dead:
             dead_transitions.append(transition)
             unreachable_transitions.append(transition)
+            liveness_level = min(liveness_level, 0)  # Nếu có transition dead, liveness_level = 0
         elif is_L4:  # L4-live = fully live
             live_transitions.append(transition)
+        elif is_L3:
+            liveness_level = min(liveness_level, 3)
+        elif is_L2:
+            liveness_level = min(liveness_level, 2)
+        elif is_L1:
+            liveness_level = min(liveness_level, 1)
     
     # Petri net được coi là live nếu tất cả transitions đều L4-live
     is_live = len(live_transitions) == len(net.transitions) and len(dead_transitions) == 0
@@ -232,7 +240,6 @@ def analyze_liveness(request: PetriNetRequest) -> BoundednessLivenessResult:
         bound=None,
         unbounded_places=[],
         is_live=is_live,
+        liveness_level=liveness_level,
         unreachable_transitions=unreachable_transitions
     )
-
-
