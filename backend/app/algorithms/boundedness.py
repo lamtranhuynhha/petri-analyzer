@@ -279,6 +279,7 @@ def analyze_boundedness(request: PetriNetRequest) -> BoundednessLivenessResult:
         is_bounded=is_bounded,
         bound=bound,
         unbounded_places=unbounded_places,
-        is_live=True, 
-        unreachable_transitions=[]
+        is_live=False,  # Default to False since we don't know
+        liveness_level=0,  # Default to dead (0) since we don't know
+        unreachable_transitions=[]  # We don't analyze reachability in boundedness check
     )
