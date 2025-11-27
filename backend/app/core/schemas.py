@@ -53,6 +53,7 @@ class BoundednessLivenessResult(BaseModel):
     bound: Optional[int] = Field(None, description="Giá trị k-bounded (None nếu unbounded)")
     unbounded_places: List[str] = Field(..., description="Danh sách place có token tăng vô hạn")
     is_live: bool = Field(..., description="Petri Net có đảm bảo liveness không")
+    liveness_level: int = Field(..., description="Mức độ liveness (0-4): 0=dead, 1=L1-live, 2=L2-live, 3=L3-live, 4=L4-live")
     unreachable_transitions: List[str] = Field(..., description="Danh sách transition không bao giờ firing được")
 
 
