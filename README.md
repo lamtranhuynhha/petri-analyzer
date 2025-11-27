@@ -73,6 +73,8 @@ petri-analyzer/
 │   │   ├── algorithms/     # Thuật toán phân tích
 │   │   ├── api/            # REST API endpoints
 │   │   ├── core/           # Configuration & schemas
+│   │   ├── models/         # Models for Petri Net
+│   │   ├── tests/          # Unit tests
 │   │   └── utils/          # Helper functions
 │   └── requirements.txt
 │
