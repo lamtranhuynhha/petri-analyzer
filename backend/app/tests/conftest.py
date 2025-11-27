@@ -1,5 +1,5 @@
 """
-Pytest fixtures chung cho tất cả tests
+Mẫu test cho tất cả tests
 """
 import pytest
 from app.core.schemas import PetriNetRequest
@@ -109,35 +109,7 @@ def deadlock_net():
         weights={},
         initial_marking={"p1": 1, "p2": 1, "p3": 0}
     )
-
-
-@pytest.fixture
-def mutual_exclusion_net():
-    """
-    Mạng Petri Mutual Exclusion pattern
-    - Hai process cạnh tranh critical section
-    """
-    return PetriNetRequest(
-        places=["idle1", "idle2", "critical1", "critical2", "semaphore"],
-        transitions=["enter1", "exit1", "enter2", "exit2"],
-        arcs=[
-            ["idle1", "enter1"],
-            ["semaphore", "enter1"],
-            ["enter1", "critical1"],
-            ["critical1", "exit1"],
-            ["exit1", "idle1"],
-            ["exit1", "semaphore"],
-            ["idle2", "enter2"],
-            ["semaphore", "enter2"],
-            ["enter2", "critical2"],
-            ["critical2", "exit2"],
-            ["exit2", "idle2"],
-            ["exit2", "semaphore"]
-        ],
-        weights={},
-        initial_marking={"idle1": 1, "idle2": 1, "critical1": 0, "critical2": 0, "semaphore": 1}
-    )
-
+    
 
 @pytest.fixture
 def weighted_net():

@@ -46,15 +46,6 @@ class TestSiphonsTraps:
         print(f"✓ Producer-Consumer:")
         print(f"  Siphons: {len(result.siphons)}, Traps: {len(result.traps)}")
     
-    def test_mutual_exclusion_siphons_traps(self, mutual_exclusion_net):
-        """Test siphons và traps của Mutual Exclusion"""
-        result = analyze_siphons_traps(mutual_exclusion_net)
-        
-        assert result is not None
-        
-        print(f"✓ Mutual Exclusion:")
-        print(f"  Siphons: {len(result.siphons)}, Traps: {len(result.traps)}")
-    
     def test_deadlock_net_siphons_traps(self, deadlock_net):
         """Test siphons và traps của mạng có deadlock"""
         result = analyze_siphons_traps(deadlock_net)

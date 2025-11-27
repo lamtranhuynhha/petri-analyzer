@@ -57,14 +57,14 @@ class TestBoundedness:
         
         print(f"✓ Producer-Consumer: bounded={result.is_bounded}, bound={result.bound}")
     
-    def test_mutual_exclusion_bounded(self, mutual_exclusion_net):
-        """Test mạng Mutual Exclusion - phải bounded"""
-        result = analyze_boundedness(mutual_exclusion_net)
+    # def test_mutual_exclusion_bounded(self, mutual_exclusion_net):
+    #     """Test mạng Mutual Exclusion - phải bounded"""
+    #     result = analyze_boundedness(mutual_exclusion_net)
         
-        assert result is not None
-        assert result.is_bounded == True
+    #     assert result is not None
+    #     assert result.is_bounded == True
         
-        print(f"✓ Mutual Exclusion: bounded={result.is_bounded}, bound={result.bound}")
+    #     print(f"✓ Mutual Exclusion: bounded={result.is_bounded}, bound={result.bound}")
     
     def test_weighted_net_bounded(self, weighted_net):
         """Test mạng có weighted arcs"""

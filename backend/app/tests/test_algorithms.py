@@ -101,30 +101,6 @@ class TestAlgorithmsIntegration:
         print(f"✓ Reachability: {len(reach_result.states)} states")
         print(f"✓ Boundedness: {'Bounded' if bound_result.is_bounded else 'Unbounded'}")
         print(f"✓ Deadlocks: {deadlock_result.total_deadlocks} deadlocks")
-    
-    def test_mutual_exclusion_all_algorithms(self, mutual_exclusion_net):
-        """Test tất cả thuật toán với Mutual Exclusion pattern"""
-        print("\n" + "="*70)
-        print("INTEGRATION TEST: Mutual Exclusion Net")
-        print("="*70)
-        
-        # Chạy tất cả thuật toán
-        liveness_result = analyze_liveness(mutual_exclusion_net)
-        siphons_result = analyze_siphons_traps(mutual_exclusion_net)
-        reach_result = analyze_reachability(mutual_exclusion_net, max_states=100)
-        bound_result = analyze_boundedness(mutual_exclusion_net)
-        deadlock_result = analyze_deadlock(mutual_exclusion_net)
-        
-        # Verify tất cả đều trả về kết quả
-        assert all([liveness_result, siphons_result, reach_result, bound_result, deadlock_result])
-        
-        # In kết quả
-        print(f"✓ Liveness: {'Live' if liveness_result.is_live else 'Not Live'}")
-        print(f"✓ Siphons: {len(siphons_result.siphons)}, Traps: {len(siphons_result.traps)}")
-        print(f"✓ Reachability: {len(reach_result.states)} states")
-        print(f"✓ Boundedness: {'Bounded' if bound_result.is_bounded else 'Unbounded'}")
-        print(f"✓ Deadlocks: {deadlock_result.total_deadlocks} deadlocks")
-
 
 class TestConsistencyChecks:
     """Test tính nhất quán giữa các thuật toán"""

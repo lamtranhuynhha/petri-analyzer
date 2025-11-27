@@ -19,17 +19,17 @@ tests/
 ## 🎯 Loại Tests
 
 ### 1. **Unit Tests** (Từng thuật toán riêng)
-- `test_boundedness.py` - 15+ test cases
-- `test_deadlock.py` - 13+ test cases
-- `test_liveness.py` - 17+ test cases
-- `test_reachability.py` - 18+ test cases
-- `test_siphons_traps.py` - 20+ test cases
+- `test_boundedness.py` 
+- `test_deadlock.py` 
+- `test_liveness.py` 
+- `test_reachability.py` 
+- `test_siphons_traps.py`
 
 ### 2. **Integration Tests** (Tất cả thuật toán)
 - `test_algorithms.py` - Test tích hợp, consistency checks, performance tests
 
 ### 3. **Fixtures** (Test data)
-- `conftest.py` - 9 mạng Petri mẫu với các đặc điểm khác nhau
+- `conftest.py`
 
 ## 🚀 Cách chạy Tests
 
@@ -109,25 +109,20 @@ Pattern Producer-Consumer
 - Producer: `p1 -> t1 -> buffer`
 - Consumer: `buffer -> t2 -> p2`
 
-### 4. `mutual_exclusion_net`
-Pattern Mutual Exclusion
-- Hai process cạnh tranh critical section
-- Có semaphore
-
-### 5. `unbounded_net`
+### 4. `unbounded_net`
 Mạng unbounded
 - Token tại p1 tăng vô hạn
 
-### 6. `deadlock_net`
+### 5. `deadlock_net`
 Mạng có nhiều deadlock states
 
-### 7. `weighted_net`
+### 6. `weighted_net`
 Mạng có weighted arcs
 
-### 8. `empty_net`
+### 7. `empty_net`
 Mạng rỗng (edge case)
 
-### 9. `single_place_net`
+### 8. `single_place_net`
 Mạng chỉ có 1 place (edge case)
 
 ## 📈 Kết quả mong đợi
@@ -214,7 +209,7 @@ pip install pytest-xdist
 pytest app/tests/ -n auto
 ```
 
-## 📝 Viết Test Mới
+## Viết Test Mới
 
 ### Template cho test mới
 ```python
@@ -230,29 +225,16 @@ def test_new_feature(self, simple_linear_net):
     print(f"✓ Test passed: {result}")
 ```
 
-### Best Practices
-1. ✅ Sử dụng fixtures từ `conftest.py`
-2. ✅ Viết docstring rõ ràng
-3. ✅ Assert các thuộc tính quan trọng
-4. ✅ Print kết quả để debug
-5. ✅ Test cả happy path và edge cases
-
-## 📚 Tài liệu tham khảo
+## Tài liệu tham khảo
 
 - [Pytest Documentation](https://docs.pytest.org/)
 - [Pytest Fixtures](https://docs.pytest.org/en/stable/fixture.html)
 - [Testing Best Practices](https://docs.pytest.org/en/stable/goodpractices.html)
 
-## ✅ Checklist trước khi commit
+## Checklist trước khi commit
 
 - [ ] Tất cả tests pass: `pytest app/tests/ -v`
 - [ ] Code coverage > 80%: `pytest app/tests/ --cov=app.algorithms`
 - [ ] Không có warnings: `pytest app/tests/ -v --strict-warnings`
 - [ ] Format code: `black app/tests/`
 - [ ] Lint code: `flake8 app/tests/`
-
----
-
-**Tổng số tests**: 80+ test cases  
-**Coverage**: 5 thuật toán + integration tests  
-**Thời gian chạy**: ~10-15 giây cho tất cả tests
