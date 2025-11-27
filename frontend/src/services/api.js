@@ -98,6 +98,7 @@ export const exportPetriNet = async (netData, format) => {
  * @returns {Promise} - RG data with states and edges
  */
 export const analyzeReachability = async (netData) => {
+
   return await apiClient.post('/analyze/reachability', netData);
 };
 

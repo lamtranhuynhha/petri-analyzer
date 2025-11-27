@@ -18,7 +18,7 @@ from app.algorithms.siphons_traps import analyze_siphons_traps
 from app.algorithms.reachability import analyze_reachability
 from app.algorithms.boundedness import analyze_boundedness
 
-router = APIRouter(prefix="/analyze", tags=["Analysis"])
+router = APIRouter(prefix="/api/analyze", tags=["Analysis"])
 
 
 @router.post("/deadlock", response_model=DeadlockResult)

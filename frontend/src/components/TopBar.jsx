@@ -100,7 +100,7 @@ const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
               title="Xuất file"
             >
               <FaDownload className="text-gray-600" />
-              <span className="ml-1 text-xs">▼</span>
+              {/* <span className="ml-1 text-xs">▼</span> */}
             </button>
             
             {showExportMenu && (
@@ -109,33 +109,33 @@ const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
                   onClick={() => handleExport('png')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
                 >
-                  🖼️ Export PNG
+                  Export PNG
                 </button>
                 <button
                   onClick={() => handleExport('svg')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
                 >
-                  🖼️ Export SVG
+                 Export SVG
                 </button>
                 <div className="border-t border-gray-200 my-1"></div>
                 <button
                   onClick={() => handleExport('pnml')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
                 >
-                  📄 Export PNML
+                  Export PNML
                 </button>
                 <button
                   onClick={() => handleExport('json')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
                 >
-                  📄 Export JSON
+                  Export JSON
                 </button>
                 <div className="border-t border-gray-200 my-1"></div>
                 <button
                   onClick={() => handleExport('rg')}
                   className="w-full px-4 py-2 text-left hover:bg-gray-100 text-sm"
                 >
-                  📊 Export RG
+                  Export RG
                 </button>
               </div>
             )}
