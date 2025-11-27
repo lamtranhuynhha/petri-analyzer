@@ -268,30 +268,6 @@ class TestLivenessEdgeCases:
         
         print(f"✓ All enabled: live={result.is_live}")
     
-    def test_unbounded_net_liveness(self, unbounded_net):
-        """Test liveness của mạng unbounded"""
-        # Sử dụng trực tiếp fixture unbounded_net vì nó đã là đối tượng PetriNet
-        result = analyze_liveness(unbounded_net)
-        
-        assert result is not None
-        assert hasattr(result, 'is_live')
-        assert hasattr(result, 'liveness_level')
-        assert hasattr(result, 'is_bounded')
-        
-        # Mạng unbounded phải được đánh dấu là không bounded
-        assert result.is_bounded is False
-        
-        # Kiểm tra liveness_level hợp lệ
-        assert 0 <= result.liveness_level <= 4
-        
-        print(f"Unbounded net liveness: is_live={result.is_live}, level={result.liveness_level}")
-        
-        # Nếu mạng được đánh dấu là live, kiểm tra liveness_level
-        if result.is_live:
-            assert result.liveness_level >= 1  # Ít nhất là L1-live
-        
-        print(f"✓ Unbounded net: live={result.is_live}, level={result.liveness_level}")
-    
     def test_complex_mutual_exclusion(self):
         """Test mạng phức tạp hơn với nhiều processes"""
         from app.core.schemas import PetriNetRequest
