@@ -22,6 +22,7 @@ function App() {
     resetNet,
     loadPetriNet,
     getPetriNetData,
+    getPetriNetDataGraphic,
     setAnalysisResult,
     setLoading,
     updateStatus,
@@ -92,7 +93,7 @@ function App() {
   
   const handleSave = () => {
     try {
-      const data = getPetriNetData();
+      const data = getPetriNetDataGraphic();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -109,7 +110,7 @@ function App() {
   
   const handleExport = async (format, options = {}) => {
     try {
-      const data = getPetriNetData();
+      const data = getPetriNetDataGraphic();
       
       if (format === 'json') {
         const exportData = options.includeAnalysis
@@ -127,10 +128,26 @@ function App() {
       } else if (format === 'pnml') {
         const result = await api.exportPetriNet(data, 'pnml');
         // Download file from result
+        const blob = result;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `petri-net-export-${Date.now()}.pnml`;
+        a.click();
+        URL.revokeObjectURL(url);
         toast.success('Đã export PNML');
       } else if (format === 'png' || format === 'svg') {
         // Export canvas as image
-        toast.info('Chức năng export ảnh đang được phát triển');
+        const result = await api.exportPetriNet(data, format);
+        // Download file from result
+        const blob = result;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `petri-net-export-${Date.now()}.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Đã export ${format}`);
       } else if (format === 'rg') {
         // Export reachability graph
         toast.info('Chức năng export RG đang được phát triển');
