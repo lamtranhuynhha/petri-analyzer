@@ -14,7 +14,7 @@ from app.utils.graphviz_helper import (
 )
 import base64
 
-router = APIRouter(prefix="/visualize", tags=["Visualization"])
+router = APIRouter(prefix="/api/visualize", tags=["Visualization"])
 
 
 @router.post("/reachability")

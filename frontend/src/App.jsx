@@ -153,54 +153,59 @@ function App() {
     
     try {
       setLoading(type, true);
-      
       switch (type) {
         case 'reachability': {
           const result = await api.analyzeReachability(data);
-          setAnalysisResult('reachability', result.result);
+          // SỬA: Bỏ .result đi
+          setAnalysisResult('reachability', result); 
           updateStatus({
-            stateCount: result.result?.states?.length || 0,
-            hasWarning: result.result?.truncated || false,
-            warningMessage: result.result?.truncated ? 'State explosion detected' : '',
+            // SỬA: Truy cập trực tiếp result.states
+            stateCount: result?.states?.length || 0,
+            hasWarning: false, // Backend hiện tại chưa trả về field 'truncated' trong ReachabilityResult
+            warningMessage: '',
           });
-          toast.success(`Đã build RG với ${result.result?.states?.length || 0} states`);
+          toast.success(`Đã build RG với ${result?.states?.length || 0} states`);
           break;
         }
-        
+
         case 'deadlock': {
+          // Đoạn này bạn đang làm ĐÚNG với cấu trúc backend
           const result = await api.analyzeDeadlock(data);
           setAnalysisResult('deadlock', result);
           toast.success(`Tìm thấy ${result.total_deadlocks} deadlock states`);
           break;
         }
-        
+
         case 'boundedness': {
           const result = await api.analyzeBoundedness(data);
-          setAnalysisResult('boundedness', result.result);
+          // SỬA: Bỏ .result
+          setAnalysisResult('boundedness', result);
           updateStatus({
-            isBounded: result.result?.is_bounded,
+            // SỬA: Truy cập trực tiếp result.is_bounded
+            isBounded: result?.is_bounded,
           });
           toast.success(
-            result.result?.is_bounded
-              ? 'Net is BOUNDED'
-              : 'Net is UNBOUNDED'
+            result?.is_bounded ? 'Net is BOUNDED' : 'Net is UNBOUNDED'
           );
           break;
         }
-        
+
         case 'liveness': {
           const result = await api.analyzeLiveness(data);
-          setAnalysisResult('liveness', result.result);
+          // SỬA: Bỏ .result
+          setAnalysisResult('liveness', result);
           toast.success('Đã phân tích liveness');
           break;
         }
-        
+
         case 'siphonsTraps': {
           const result = await api.analyzeSiphonsTraps(data);
-          setAnalysisResult('siphonsTraps', result.result);
+          // SỬA: Bỏ .result
+          setAnalysisResult('siphonsTraps', result);
           toast.success(
-            `Tìm thấy ${result.result?.minimal_siphons?.length || 0} siphons, ` +
-            `${result.result?.minimal_traps?.length || 0} traps`
+            // SỬA: Truy cập trực tiếp
+            `Tìm thấy ${result?.minimal_siphons?.length || 0} siphons, ` +
+            `${result?.minimal_traps?.length || 0} traps`
           );
           break;
         }
