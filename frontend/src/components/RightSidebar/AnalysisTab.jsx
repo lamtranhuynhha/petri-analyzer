@@ -42,7 +42,6 @@ const AnalysisTab = ({ onAnalyze }) => {
     onAnalyze(type);
   };
   
-  // Helper render Siphons/Traps dạng Chips (Đã tăng cỡ chữ lên text-sm)
   const renderNodeSetChips = (nodeSets, colorClass = "bg-blue-100 text-blue-800") => {
     if (!nodeSets || nodeSets.length === 0) return <div className="text-sm text-gray-500 italic">None found</div>;
     
@@ -54,7 +53,7 @@ const AnalysisTab = ({ onAnalyze }) => {
             className={`text-sm px-2 py-1 rounded-full border border-opacity-20 cursor-help transition-colors hover:bg-opacity-80 ${colorClass}`}
             title={`Nodes: ${set.join(', ')}`}
           >
-            {'{' + set.join(', ') + '}'}
+            {set.join(', ')}
           </span>
         ))}
       </div>
