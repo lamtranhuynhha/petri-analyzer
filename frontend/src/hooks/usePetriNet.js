@@ -129,28 +129,40 @@ const usePetriNetStore = create((set, get) => ({
     }
     get().resetSimulationIfModelChanged();
 
-    const newPlaces = state.places.map(p => p.id === id ? { ...p, ...updates } : p);
+    const newPlaces = state.places.map(p => 
+      p.id === id ? { 
+        ...p, 
+        ...updates,
+        tokens: updates.tokens !== undefined ? Number(updates.tokens) : p.tokens
+      } : p
+    );
+    
     const newInitialMarking = { ...state.initialMarking };
     const newCurrentMarking = { ...state.currentMarking };
 
     if (updates.tokens !== undefined) {
-      newInitialMarking[id] = updates.tokens;
+      const tokens = Number(updates.tokens);
+      newInitialMarking[id] = tokens;
 
       // CHỈ update currentMarking nếu chưa có simulation history
       if (state.simulationHistory.length === 0) {
-        newCurrentMarking[id] = updates.tokens;
+        newCurrentMarking[id] = tokens;
       }
-      // Nếu đã có history → KHÔNG thay đổi currentMarking (preserve simulation state)
     }
 
     return {
       places: newPlaces,
       initialMarking: newInitialMarking,
       currentMarking: newCurrentMarking,
-      initialMarking: newMarking,
-      currentMarking: { ...state.currentMarking, [id]: newMarking[id] },
       selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'place' 
-        ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
+        ? { 
+            ...state.selectedElement, 
+            data: { 
+              ...state.selectedElement.data, 
+              ...updates,
+              tokens: updates.tokens !== undefined ? Number(updates.tokens) : state.selectedElement.data.tokens
+            } 
+          } 
         : state.selectedElement
     };
   }),
@@ -181,7 +193,6 @@ const usePetriNetStore = create((set, get) => ({
 
     const newCurrentMarking = { ...state.currentMarking };
     delete newCurrentMarking[id];
-
 
     // Reset selection nếu đang chọn
     const selectedElement = state.selectedElement?.id === id ? null : state.selectedElement;
@@ -222,17 +233,12 @@ const usePetriNetStore = create((set, get) => ({
     get().resetSimulationIfModelChanged();
 
     return {
-      transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t)
+      transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t),
+      selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'transition' 
+        ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
+        : state.selectedElement
     };
   }),
-
-  
-  updateTransition: (id, updates) => set((state) => ({
-    transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t),
-    selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'transition' 
-      ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
-      : state.selectedElement
-  })),
   
   deleteTransition: (id) => set((state) => {
     // BLOCK nếu đang auto play
