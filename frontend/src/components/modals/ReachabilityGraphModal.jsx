@@ -143,7 +143,7 @@ const ReachabilityGraphModal = () => {
           <div className="flex items-center gap-6 text-sm">
             <div>
               <span className="text-gray-600">Total states:</span>{' '}
-              <span className="font-semibold">{rgData.states?.length || 0}</span>
+              <span className="font-semibold">{rgData.total_states ?? (rgData.states?.length || 0)}</span>
             </div>
             <div>
               <span className="text-gray-600">Deadlocks:</span>{' '}

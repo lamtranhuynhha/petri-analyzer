@@ -170,4 +170,21 @@ code {
   @apply bg-white rounded-lg shadow-xl max-w-4xl max-h-screen overflow-auto;
 }
 
+/* Petri net custom nodes: ensure edges attach to the visual shape, not including label height */
+.place-node,
+.transition-node {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.place-label,
+.transition-label {
+  position: absolute;
+  top: 100%;
+  margin-top: 4px;
+  width: 100%;
+  text-align: center;
+}
 

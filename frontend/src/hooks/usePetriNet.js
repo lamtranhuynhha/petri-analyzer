@@ -16,6 +16,7 @@ const usePetriNetStore = create((set, get) => ({
   selectedTool: 'select', // 'select', 'place', 'transition', 'arc', 'token'
   selectedElement: null, // { type: 'place'|'transition'|'arc', id: string, data: object }
   activeTab: 'properties', // 'properties', 'analysis', 'simulation'
+  firstSelectedNode: null, // For arc creation mode
   
   // ============ MODALS ============
   modals: {
@@ -201,6 +202,8 @@ const usePetriNetStore = create((set, get) => ({
   setSelectedElement: (element) => set({ selectedElement: element }),
   
   setActiveTab: (tab) => set({ activeTab: tab }),
+  
+  setFirstSelectedNode: (node) => set({ firstSelectedNode: node }),
   
   openModal: (modalName) => set((state) => ({
     modals: { ...state.modals, [modalName]: true }
