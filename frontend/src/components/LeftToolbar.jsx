@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaMousePointer, FaCircle, FaSquare, FaArrowRight, FaDotCircle, FaUndo, FaRedo, FaQuestionCircle } from 'react-icons/fa';
+import { FaMousePointer, FaCircle, FaSquare, FaArrowRight, FaDotCircle, FaQuestionCircle } from 'react-icons/fa';
 import usePetriNetStore from '../hooks/usePetriNet';
 
 /**
@@ -9,11 +9,7 @@ const LeftToolbar = () => {
   const {
     selectedTool,
     setSelectedTool,
-    selectedElement,
-    undo,
-    redo,
-    canUndo,
-    canRedo,
+    selectedElement, 
     openModal
   } = usePetriNetStore();
   
@@ -55,48 +51,7 @@ const LeftToolbar = () => {
       </div>
       
       {/* Divider */}
-      <div className="w-12 h-px bg-gray-300"></div>
-      
-      {/* Actions Section */}
-      <div className="flex flex-col gap-2">
-        <div className="text-xs font-semibold text-gray-500 text-center mb-2">ACTIONS</div>
-        
-        <button
-          onClick={undo}
-          disabled={!canUndo()}
-          className={`
-            w-14 h-14 rounded-lg flex items-center justify-center
-            transition-all duration-200
-            ${canUndo()
-              ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              : 'bg-gray-50 text-gray-300 cursor-not-allowed'
-            }
-          `}
-          title="Undo (Ctrl+Z)"
-        >
-          <FaUndo className="text-xl" />
-        </button>
-        
-        <button
-          onClick={redo}
-          disabled={!canRedo()}
-          className={`
-            w-14 h-14 rounded-lg flex items-center justify-center
-            transition-all duration-200
-            ${canRedo()
-              ? 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-              : 'bg-gray-50 text-gray-300 cursor-not-allowed'
-            }
-          `}
-          title="Redo (Ctrl+Y)"
-        >
-          <FaRedo className="text-xl" />
-        </button>
-      </div>
-      
-      {/* Divider */}
-      <div className="w-12 h-px bg-gray-300"></div>
-
+      <div className="w-12 h-px bg-gray-300"></div> 
       {/* Help */}
       <div className="flex flex-col gap-2">
          <button

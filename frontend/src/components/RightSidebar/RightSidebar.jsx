@@ -11,9 +11,9 @@ const RightSidebar = ({ onAnalyze }) => {
   const { activeTab, setActiveTab } = usePetriNetStore();
   
   const tabs = [
-    { id: 'properties', label: 'Props', component: PropertiesTab },
+    { id: 'properties', label: 'Properties', component: PropertiesTab },
     { id: 'analysis', label: 'Analysis', component: AnalysisTab },
-    { id: 'simulation', label: 'Sim', component: SimulationTab },
+    { id: 'simulation', label: 'Simulation', component: SimulationTab },
   ];
   
   const ActiveComponent = tabs.find(t => t.id === activeTab)?.component || PropertiesTab;

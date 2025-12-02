@@ -1,5 +1,5 @@
 import React from 'react';
-import { FaTrash } from 'react-icons/fa';
+import { FaTrash, FaMousePointer } from 'react-icons/fa';
 import usePetriNetStore from '../../hooks/usePetriNet';
 
 /**
@@ -15,6 +15,8 @@ const PropertiesTab = () => {
     deleteTransition,
     deleteArc,
     arcs,
+    places,
+    transitions,
     getEnabledTransitions,
     analysisResults,
   } = usePetriNetStore();
@@ -22,8 +24,8 @@ const PropertiesTab = () => {
   if (!selectedElement) {
     return (
       <div className="flex flex-col items-center justify-center h-full text-gray-500">
-        <div className="text-4xl mb-2">👆</div>
-        <p className="text-sm text-center">Chọn một element để xem properties</p>
+        <FaMousePointer className="text-4xl mb-2 text-gray-400" />
+        <p className="text-sm text-center">Choose an element to view its properties</p>
       </div>
     );
   }
@@ -33,7 +35,7 @@ const PropertiesTab = () => {
   // PLACE properties
   if (type === 'place') {
     const handleTokenChange = (value) => {
-      const tokens = Math.max(0, parseInt(value) || 0);
+      const tokens = Math.max(1, parseInt(value) || 1);
       updatePlace(id, { tokens });
     };
     
@@ -48,7 +50,7 @@ const PropertiesTab = () => {
     return (
       <div className="p-4 space-y-4">
         <div className="bg-blue-50 p-3 rounded">
-          <div className="font-semibold text-blue-900">📍 Place: {id}</div>
+          <div className="font-semibold text-blue-900">Place: {id}</div>
         </div>
         
         <div className="space-y-3">
@@ -82,7 +84,7 @@ const PropertiesTab = () => {
               Tokens
             </label>
             <div className="flex items-center gap-2">
-              <input
+            <input
                 type="number"
                 min="0"
                 value={data.tokens || 0}
@@ -161,7 +163,7 @@ const PropertiesTab = () => {
     return (
       <div className="p-4 space-y-4">
         <div className="bg-purple-50 p-3 rounded">
-          <div className="font-semibold text-purple-900">🔄 Transition: {id}</div>
+          <div className="font-semibold text-purple-900">Transition: {id}</div>
         </div>
         
         <div className="space-y-3">
@@ -208,7 +210,7 @@ const PropertiesTab = () => {
             <div className="flex justify-between">
               <span className="text-gray-600">Status:</span>
               <span className={`font-semibold ${isEnabled ? 'text-green-600' : 'text-red-600'}`}>
-                {isEnabled ? '✅ Enabled' : '❌ Disabled'}
+                {isEnabled ? 'Enabled' : 'Disabled'}
               </span>
             </div>
             
@@ -239,54 +241,87 @@ const PropertiesTab = () => {
       updateArc(id, { weight });
     };
     
+    // Get the source and target elements for better display
+    const allElements = [...places, ...transitions];
+    
+    // Get the correct source and target from the arc data
+    const arc = arcs.find(a => a.id === id) || {};
+    const sourceId = arc.source || data.source || '';
+    const targetId = arc.target || data.target || '';
+    const currentWeight = data.weight || arc.weight || 1;
+    
+    const sourceElement = allElements.find(el => el.id === sourceId);
+    const targetElement = allElements.find(el => el.id === targetId);
+    
+    const getElementDisplay = (element, id) => {
+      if (!id) return 'Unknown';
+      if (!element) {
+        // If element not found, try to determine if it's a place or transition by ID
+        const elementType = id.startsWith('p') ? 'Place' : id.startsWith('t') ? 'Transition' : 'Element';
+        return `${elementType} ${id}`;
+      }
+      return element.label || element.id;
+    };
+    
     return (
       <div className="p-4 space-y-4">
         <div className="bg-green-50 p-3 rounded">
-          <div className="font-semibold text-green-900">→ Arc: {id}</div>
+          <div className="font-semibold text-green-900">
+            Arc: {getElementDisplay(sourceElement, sourceId)} → {getElementDisplay(targetElement, targetId)}
+          </div>
+          <div className="text-xs text-gray-500 mt-1">ID: {id}</div>
         </div>
         
         <div className="space-y-3">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              From
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Source
             </label>
-            <input
-              type="text"
-              value={data.source || ''}
-              disabled
-              className="input w-full bg-gray-100 cursor-not-allowed"
-            />
+            <div className="p-2 bg-gray-50 rounded border border-gray-200 text-sm">
+              {getElementDisplay(sourceElement, sourceId)} <span className="text-gray-400">({sourceId})</span>
+            </div>
           </div>
           
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              To
+            <label className="block text-xs font-medium text-gray-500 mb-1">
+              Target
             </label>
-            <input
-              type="text"
-              value={data.target || ''}
-              disabled
-              className="input w-full bg-gray-100 cursor-not-allowed"
-            />
+            <div className="p-2 bg-gray-50 rounded border border-gray-200 text-sm">
+              {getElementDisplay(targetElement, targetId)} <span className="text-gray-400">({targetId})</span>
+            </div>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Weight
             </label>
-            <input
-              type="number"
-              min="1"
-              value={data.weight || 1}
-              onChange={(e) => handleWeightChange(e.target.value)}
-              className="input w-full"
-            />
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                min="1"
+                value={currentWeight}
+                onChange={(e) => handleWeightChange(e.target.value)}
+                className="input w-full"
+              />
+              <button
+                onClick={() => handleWeightChange(currentWeight + 1)}
+                className="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+              >
+                +
+              </button>
+              <button
+                onClick={() => handleWeightChange(Math.max(1, currentWeight - 1))}
+                className="px-3 py-2 bg-red-500 text-white rounded hover:bg-red-600"
+              >
+                -
+              </button>
+            </div>
           </div>
         </div>
         
         <button
           onClick={() => deleteArc(id)}
-          className="w-full btn-danger flex items-center justify-center gap-2"
+          className="w-full btn-danger flex items-center justify-center gap-2 mt-4"
         >
           <FaTrash />
           Delete Arc
