@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback } from 'react';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -26,12 +26,31 @@ function App() {
     setLoading,
     updateStatus,
     undo,
-    redo,
     canUndo,
-    canRedo,
     setSelectedTool,
+    places,
+    transitions,
+    setSelectedElement,
   } = usePetriNetStore();
   
+  // File operations
+  const handleSave = useCallback(() => {
+    try {
+      const data = getPetriNetData();
+      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `petri-net-${Date.now()}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success('Đã lưu file JSON');
+    } catch (error) {
+      console.error('Error saving file:', error);
+      toast.error('Lỗi khi lưu file');
+    }
+  }, [getPetriNetData]);
+
   // Keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e) => {
@@ -39,12 +58,6 @@ function App() {
       if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
         e.preventDefault();
         if (canUndo()) undo();
-      }
-      
-      // Ctrl+Y hoặc Ctrl+Shift+Z: Redo
-      if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
-        e.preventDefault();
-        if (canRedo()) redo();
       }
       
       // Ctrl+S: Save
@@ -65,9 +78,16 @@ function App() {
     
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [canUndo, canRedo, undo, redo, setSelectedTool]);
-  
-  // File operations
+  }, [
+    canUndo, 
+    undo, 
+    handleSave, 
+    places, 
+    transitions, 
+    setSelectedElement, 
+    setSelectedTool
+  ]);
+
   const handleNew = () => {
     resetNet();
     toast.success('Đã tạo Petri Net mới');
@@ -90,23 +110,6 @@ function App() {
     }
   };
   
-  const handleSave = () => {
-    try {
-      const data = getPetriNetData();
-      const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `petri-net-${Date.now()}.json`;
-      a.click();
-      URL.revokeObjectURL(url);
-      toast.success('Đã lưu file JSON');
-    } catch (error) {
-      console.error('Error saving file:', error);
-      toast.error('Lỗi khi lưu file');
-    }
-  };
-  
   const handleExport = async (format, options = {}) => {
     try {
       const data = getPetriNetData();
@@ -125,8 +128,8 @@ function App() {
         URL.revokeObjectURL(url);
         toast.success('Đã export JSON');
       } else if (format === 'pnml') {
-        const result = await api.exportPetriNet(data, 'pnml');
-        // Download file from result
+        await api.exportPetriNet(data, 'pnml');
+        // Download file is handled by the API
         toast.success('Đã export PNML');
       } else if (format === 'png' || format === 'svg') {
         // Export canvas as image

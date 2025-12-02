@@ -70,9 +70,7 @@ npm run build
 - `A` - Arc tool
 - `K` - Token tool
 - `Ctrl+Z` - Undo
-- `Ctrl+Y` - Redo
 - `Ctrl+S` - Save
-- `ESC` - Cancel arc drawing
 
 ## Cấu trúc
 
