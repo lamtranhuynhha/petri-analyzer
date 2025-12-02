@@ -59,8 +59,8 @@ const AnalysisTab = ({ onAnalyze }) => {
               
               <div className="text-sm bg-gray-50 p-2 rounded">
                 <div className="flex justify-between mb-1">
-                  <span className="text-gray-600">States:</span>
-                  <span className="font-semibold">{analysisResults.reachability.total_states || 0}</span>
+                  {/* <span className="text-gray-600">States:</span>
+                  <span className="font-semibold">{analysisResults.reachability.total_states || 0}</span> */}
                 </div>
                 {analysisResults.reachability.truncated && (
                   <div className="text-yellow-600 text-xs mt-1 flex items-center gap-1">
