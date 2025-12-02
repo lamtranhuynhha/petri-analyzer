@@ -147,6 +147,11 @@ const usePetriNetStore = create((set, get) => ({
       places: newPlaces,
       initialMarking: newInitialMarking,
       currentMarking: newCurrentMarking,
+      initialMarking: newMarking,
+      currentMarking: { ...state.currentMarking, [id]: newMarking[id] },
+      selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'place' 
+        ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
+        : state.selectedElement
     };
   }),
 
@@ -221,6 +226,14 @@ const usePetriNetStore = create((set, get) => ({
     };
   }),
 
+  
+  updateTransition: (id, updates) => set((state) => ({
+    transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t),
+    selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'transition' 
+      ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
+      : state.selectedElement
+  })),
+  
   deleteTransition: (id) => set((state) => {
     // BLOCK nếu đang auto play
     if (state.isSimulating) {
@@ -278,14 +291,24 @@ const usePetriNetStore = create((set, get) => ({
 
     const newArcs = state.arcs.map(a => a.id === id ? { ...a, ...updates } : a);
     const updatedArc = newArcs.find(a => a.id === id);
-    if (updatedArc && updates.weight !== undefined) {
+    if (!updatedArc) return { arcs: newArcs };
+    
+    const result = { arcs: newArcs };
+    
+    if (updates.weight !== undefined) {
       const weightKey = JSON.stringify([updatedArc.source, updatedArc.target]);
-      return {
-        arcs: newArcs,
-        weights: { ...state.weights, [weightKey]: updates.weight }
+      result.weights = { ...state.weights, [weightKey]: updates.weight };
+    }
+    
+    // Update selectedElement if it's the arc being updated
+    if (state.selectedElement?.id === id && state.selectedElement?.type === 'arc') {
+      result.selectedElement = {
+        ...state.selectedElement,
+        data: { ...state.selectedElement.data, ...updates }
       };
     }
-    return { arcs: newArcs };
+    
+    return result;
   }),
 
   deleteArc: (id) => set((state) => {

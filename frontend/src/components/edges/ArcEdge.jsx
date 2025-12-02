@@ -34,10 +34,19 @@ const ArcEdge = ({
   const weight = data?.weight || 1;
   
   const handleClick = () => {
+    // Get the weight from the store to ensure it's up to date
+    const weightKey = JSON.stringify([data.source, data.target]);
+    const currentWeight = weights[weightKey] || data.weight || 1;
+    
     setSelectedElement({
       type: 'arc',
       id,
-      data: { ...data, weight, source: data?.source, target: data?.target }
+      data: { 
+        ...data, 
+        weight: currentWeight, 
+        source: data.source, 
+        target: data.target 
+      }
     });
   };
   
