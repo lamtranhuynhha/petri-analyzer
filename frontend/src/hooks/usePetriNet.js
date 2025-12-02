@@ -16,6 +16,7 @@ const usePetriNetStore = create((set, get) => ({
   selectedTool: 'select', // 'select', 'place', 'transition', 'arc', 'token'
   selectedElement: null, // { type: 'place'|'transition'|'arc', id: string, data: object }
   activeTab: 'properties', // 'properties', 'analysis', 'simulation'
+  firstSelectedNode: null, // For arc creation mode
   
   // ============ MODALS ============
   modals: {
@@ -344,7 +345,9 @@ const usePetriNetStore = create((set, get) => ({
   setSelectedElement: (element) => set({ selectedElement: element }),
 
   setActiveTab: (tab) => set({ activeTab: tab }),
-
+  
+  setFirstSelectedNode: (node) => set({ firstSelectedNode: node }),
+  
   openModal: (modalName) => set((state) => ({
     modals: { ...state.modals, [modalName]: true }
   })),
@@ -695,8 +698,30 @@ const usePetriNetStore = create((set, get) => ({
       initial_marking: state.initialMarking,
     };
   },
+  getPetriNetDataGraphic: () => {
+  const state = get();
+  return {
+    places: state.places.map(p => ({
+      id: p.id,
+      label: p.label,
+      position: p.position || { x: 0, y: 0 },
+    })),
+    transitions: state.transitions.map(t => ({
+      id: t.id,
+      label: t.label,
+      position: t.position || { x: 0, y: 0 },
+    })),
+    arcs: state.arcs.map(a => ({
+      source: a.source,
+      target: a.target //,
+      // weight: state.weights[JSON.stringify([a.source, a.target])] || 1,
+    })),
+    weights: state.weights,
+    initial_marking: state.initialMarking,
+  };
+},
 
-  resetSimulationIfModelChanged: () => set((state) => {
+resetSimulationIfModelChanged: () => set((state) => {
     if (state.simulationHistory.length > 0 || state.isSimulating) {
       // Reset currentMarking về initialMarking
       const resetMarking = { ...state.initialMarking };
@@ -720,9 +745,7 @@ const usePetriNetStore = create((set, get) => ({
         autoPlayInterval: null,
       };
     }
-    return {};
   }),
-
 }));
 
 export default usePetriNetStore;

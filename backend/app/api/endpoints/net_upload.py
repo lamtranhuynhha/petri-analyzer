@@ -14,6 +14,7 @@ from app.core.schemas import (
 )
 from app.utils.pnml_parser import parse_pnml, generate_pnml
 from app.utils.json_converter import validate_petri_net_json
+from app.utils.graphviz_helper import *
 import json
 import io
 from typing import Dict, Any
@@ -124,6 +125,14 @@ async def export_petri_net(request: ExportRequest):
                 io.BytesIO(pnml_string.encode()),
                 media_type="application/xml",
                 headers={"Content-Disposition": "attachment; filename=petri_net.pnml"}
+            )
+        
+        elif format_type in ('png','svg'):
+            image_bytes = render_petri_net(net_data,format_type)
+            return StreamingResponse(
+                io.BytesIO(image_bytes),
+                media_type=f"image/{format_type}",
+                headers={"Content-Disposition": f"attachment; filename=petri_net.{format_type}"}
             )
         
         else:
