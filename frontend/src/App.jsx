@@ -294,6 +294,23 @@ function App() {
               )
             : 0;
 
+          // Nếu chưa có graph_image, gọi API visualization để lấy ảnh SVG
+          if (!rgResult?.graph_image) {
+            try {
+              const blob = await api.getReachabilityGraphImage(rgResult, 'svg');
+              const url = URL.createObjectURL(blob);
+              rgResult.graph_image = url; // gán URL tạm thời để modal hiển thị
+              // Mở tab mới xem đồ thị
+              window.open(url, '_blank');
+            } catch (imgErr) {
+              console.error('Lỗi khi lấy ảnh RG:', imgErr);
+              // Không có ảnh thì không mở tab, chỉ lưu kết quả
+            }
+          } else {
+            // Nếu backend đã trả URL ảnh, mở tab mới
+            window.open(rgResult.graph_image, '_blank');
+          }
+
           setAnalysisResult('reachability', rgResult);
           updateStatus({
             stateCount,
@@ -301,11 +318,6 @@ function App() {
             warningMessage: rgResult?.truncated ? 'State explosion detected' : '',
           });
           toast.success(`Đã build RG với ${stateCount} states`);
-
-          // Nếu backend trả về ảnh đồ thị, mở ở tab mới để xem rõ hơn
-          if (rgResult?.graph_image) {
-            window.open(rgResult.graph_image, '_blank');
-          }
 
           break;
         }

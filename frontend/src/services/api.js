@@ -148,7 +148,7 @@ export const analyzeSiphonsTraps = async (netData) => {
  */
 export const getReachabilityGraphImage = async (rgData, format = 'svg') => {
   return await apiClient.post(`/visualize/reachability`, {
-    rg_data: rgData,
+    data: rgData,
     format,
   }, {
     responseType: 'blob',

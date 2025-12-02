@@ -13,10 +13,10 @@ const usePetriNetStore = create((set, get) => ({
   initialMarking: {},
   
   // ============ UI STATE ============
-  selectedTool: 'select', // 'select', 'place', 'transition', 'arc', 'token'
-  selectedElement: null, // { type: 'place'|'transition'|'arc', id: string, data: object }
-  activeTab: 'properties', // 'properties', 'analysis', 'simulation'
-  firstSelectedNode: null, // For arc creation mode
+  selectedTool: 'select',
+  selectedElement: null,
+  activeTab: 'properties',
+  firstSelectedNode: null,
   
   // ============ MODALS ============
   modals: {
@@ -68,7 +68,6 @@ const usePetriNetStore = create((set, get) => ({
   // ============ ACTIONS - Model Management ============
   
   addPlace: (place) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot add place while auto play is running. Please pause first.');
       return state;
@@ -76,23 +75,19 @@ const usePetriNetStore = create((set, get) => ({
 
     const newMarking = { ...state.initialMarking, [place.id]: place.tokens || 0 };
     
-    // Nếu đã có simulation history → cần reset về M0
     const shouldReset = state.simulationHistory.length > 0;
     
     if (shouldReset) {
-      // Reset ALL places CŨ về initialMarking tokens
       const resetPlaces = state.places.map(p => ({
         ...p,
         tokens: state.initialMarking[p.id] || 0
       }));
       
-      // Thêm place MỚI
       resetPlaces.push({
         ...place,
         tokens: place.tokens || 0
       });
       
-      // Clear interval nếu đang auto play
       if (state.autoPlayInterval) {
         clearInterval(state.autoPlayInterval);
       }
@@ -100,17 +95,16 @@ const usePetriNetStore = create((set, get) => ({
       get().saveToHistory();
       
       return {
-        places: resetPlaces, // ← Reset visual tokens
+        places: resetPlaces,
         initialMarking: newMarking,
-        currentMarking: newMarking, // Reset về M0
-        simulationHistory: [], // Clear history
+        currentMarking: newMarking,
+        simulationHistory: [],
         isSimulating: false,
         autoPlayInterval: null,
         status: { ...state.status, elementCount: { ...state.status.elementCount, places: resetPlaces.length } }
       };
     }
     
-    // Nếu chưa fire, chỉ thêm place bình thường
     const newPlaces = [...state.places, place];
     get().saveToHistory();
     
@@ -123,7 +117,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   updatePlace: (id, updates) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot update place while auto play is running. Please pause first.');
       return state;
@@ -137,19 +130,15 @@ const usePetriNetStore = create((set, get) => ({
     if (updates.tokens !== undefined) {
       newInitialMarking[id] = updates.tokens;
 
-      // CHỈ update currentMarking nếu chưa có simulation history
       if (state.simulationHistory.length === 0) {
         newCurrentMarking[id] = updates.tokens;
       }
-      // Nếu đã có history → KHÔNG thay đổi currentMarking (preserve simulation state)
     }
 
     return {
       places: newPlaces,
       initialMarking: newInitialMarking,
       currentMarking: newCurrentMarking,
-      initialMarking: newMarking,
-      currentMarking: { ...state.currentMarking, [id]: newMarking[id] },
       selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'place' 
         ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
         : state.selectedElement
@@ -157,7 +146,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   deletePlace: (id) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot delete place while auto play is running. Please pause first.');
       return state;
@@ -166,11 +154,9 @@ const usePetriNetStore = create((set, get) => ({
 
     get().saveToHistory();
     const newPlaces = state.places.filter(p => p.id !== id);
-    // Xóa arc liên quan
     const arcsToRemove = state.arcs.filter(a => a.source === id || a.target === id);
     const newArcs = state.arcs.filter(a => a.source !== id && a.target !== id);
 
-    // CLEANUP WEIGHTS
     const newWeights = { ...state.weights };
     arcsToRemove.forEach(arc => {
       const key = JSON.stringify([arc.source, arc.target]);
@@ -183,8 +169,6 @@ const usePetriNetStore = create((set, get) => ({
     const newCurrentMarking = { ...state.currentMarking };
     delete newCurrentMarking[id];
 
-
-    // Reset selection nếu đang chọn
     const selectedElement = state.selectedElement?.id === id ? null : state.selectedElement;
 
     return {
@@ -199,7 +183,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   addTransition: (transition) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot add transition while auto play is running. Please pause first.');
       return state;
@@ -215,7 +198,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   updateTransition: (id, updates) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot update transition while auto play is running. Please pause first.');
       return state;
@@ -223,20 +205,14 @@ const usePetriNetStore = create((set, get) => ({
     get().resetSimulationIfModelChanged();
 
     return {
-      transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t)
+      transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t),
+      selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'transition' 
+        ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
+        : state.selectedElement
     };
   }),
-
-  
-  updateTransition: (id, updates) => set((state) => ({
-    transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t),
-    selectedElement: state.selectedElement?.id === id && state.selectedElement?.type === 'transition' 
-      ? { ...state.selectedElement, data: { ...state.selectedElement.data, ...updates } } 
-      : state.selectedElement
-  })),
   
   deleteTransition: (id) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot delete transition while auto play is running. Please pause first.');
       return state;
@@ -249,7 +225,6 @@ const usePetriNetStore = create((set, get) => ({
     const arcsToRemove = state.arcs.filter(a => a.source === id || a.target === id);
     const newArcs = state.arcs.filter(a => a.source !== id && a.target !== id);
 
-    // CLEANUP WEIGHTS
     const newWeights = { ...state.weights };
     arcsToRemove.forEach(arc => {
       const key = JSON.stringify([arc.source, arc.target]);
@@ -268,7 +243,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   addArc: (arc) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot add arc while auto play is running. Please pause first.');
       return state;
@@ -283,7 +257,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   updateArc: (id, updates) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot update arc while auto play is running. Please pause first.');
       return state;
@@ -301,7 +274,6 @@ const usePetriNetStore = create((set, get) => ({
       result.weights = { ...state.weights, [weightKey]: updates.weight };
     }
     
-    // Update selectedElement if it's the arc being updated
     if (state.selectedElement?.id === id && state.selectedElement?.type === 'arc') {
       result.selectedElement = {
         ...state.selectedElement,
@@ -313,7 +285,6 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   deleteArc: (id) => set((state) => {
-    // BLOCK nếu đang auto play
     if (state.isSimulating) {
       console.warn('Cannot delete arc while auto play is running. Please pause first.');
       return state;
@@ -357,7 +328,6 @@ const usePetriNetStore = create((set, get) => ({
   setCurrentMarking: (marking) => set({ currentMarking: marking }),
 
   resetToInitialMarking: () => set((state) => {
-    // Reset visual tokens về initialMarking
     const updatedPlaces = state.places.map(p => ({
       ...p,
       tokens: state.initialMarking[p.id] || 0
@@ -374,12 +344,10 @@ const usePetriNetStore = create((set, get) => ({
     const transition = state.transitions.find(t => t.id === transitionId);
     if (!transition) return state;
 
-    // Tính toán marking mới
     const newMarking = { ...state.currentMarking };
     const inputArcs = state.arcs.filter(a => a.target === transitionId);
     const outputArcs = state.arcs.filter(a => a.source === transitionId);
 
-    // Kiểm tra enabled
     const isEnabled = inputArcs.every(arc => {
       const weightKey = JSON.stringify([arc.source, arc.target]);
       const weight = state.weights[weightKey] || 1;
@@ -388,27 +356,23 @@ const usePetriNetStore = create((set, get) => ({
 
     if (!isEnabled) return state;
 
-    // Consume tokens từ input places
     inputArcs.forEach(arc => {
       const weightKey = JSON.stringify([arc.source, arc.target]);
       const weight = state.weights[weightKey] || 1;
       newMarking[arc.source] -= weight;
     });
 
-    // Produce tokens vào output places
     outputArcs.forEach(arc => {
       const weightKey = JSON.stringify([arc.source, arc.target]);
       const weight = state.weights[weightKey] || 1;
       newMarking[arc.target] = (newMarking[arc.target] || 0) + weight;
     });
 
-    // Cập nhật visual tokens trên canvas
     const updatedPlaces = state.places.map(p => ({
       ...p,
       tokens: newMarking[p.id] || 0
     }));
 
-    // Thêm vào history
     const historyEntry = {
       marking: state.currentMarking,
       transition: transitionId,
@@ -416,7 +380,7 @@ const usePetriNetStore = create((set, get) => ({
     }; 
 
     return {
-      places: updatedPlaces, // ← Cập nhật visual
+      places: updatedPlaces,
       currentMarking: newMarking,
       simulationHistory: [...state.simulationHistory, historyEntry],
     };
@@ -574,7 +538,6 @@ const usePetriNetStore = create((set, get) => ({
         }
       };
       
-      // Download JSON file
       const blob = new Blob([JSON.stringify(trace, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -600,7 +563,6 @@ const usePetriNetStore = create((set, get) => ({
       const initialVector = initialKeys.map(id => state.initialMarking[id] || 0);
       text += `Initial Marking: M0(${initialVector.join(',')})\n\n`;
 
-      // Steps
       if (state.simulationHistory.length > 0) {
         state.simulationHistory.forEach((entry, index) => {
           const stepNum = index + 1;
@@ -616,7 +578,6 @@ const usePetriNetStore = create((set, get) => ({
         text += "No firing history\n";
       }
 
-      // Download text file
       const blob = new Blob([text], { type: 'text/plain' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -692,50 +653,44 @@ const usePetriNetStore = create((set, get) => ({
       initial_marking: state.initialMarking,
     };
   },
-  getPetriNetDataGraphic: () => {
-  const state = get();
-  return {
-    places: state.places.map(p => ({
-      id: p.id,
-      label: p.label,
-      position: p.position || { x: 0, y: 0 },
-    })),
-    transitions: state.transitions.map(t => ({
-      id: t.id,
-      label: t.label,
-      position: t.position || { x: 0, y: 0 },
-    })),
-    arcs: state.arcs.map(a => ({
-      source: a.source,
-      target: a.target //,
-      // weight: state.weights[JSON.stringify([a.source, a.target])] || 1,
-    })),
-    weights: state.weights,
-    initial_marking: state.initialMarking,
-  };
-},
-
   
-}));
+  getPetriNetDataGraphic: () => {
+    const state = get();
+    return {
+      places: state.places.map(p => ({
+        id: p.id,
+        label: p.label,
+        position: p.position || { x: 0, y: 0 },
+      })),
+      transitions: state.transitions.map(t => ({
+        id: t.id,
+        label: t.label,
+        position: t.position || { x: 0, y: 0 },
+      })),
+      arcs: state.arcs.map(a => ({
+        source: a.source,
+        target: a.target
+      })),
+      weights: state.weights,
+      initial_marking: state.initialMarking,
+    };
+  },
 
   resetSimulationIfModelChanged: () => set((state) => {
     if (state.simulationHistory.length > 0 || state.isSimulating) {
-      // Reset currentMarking về initialMarking
       const resetMarking = { ...state.initialMarking };
       
-      // QUAN TRỌNG: Cập nhật lại tokens trong places array để đồng bộ visual
       const updatedPlaces = state.places.map(p => ({
         ...p,
         tokens: resetMarking[p.id] || 0
       }));
       
-      // Clear interval nếu đang auto play
       if (state.autoPlayInterval) {
         clearInterval(state.autoPlayInterval);
       }
       
       return {
-        places: updatedPlaces, // ← Reset visual tokens
+        places: updatedPlaces,
         currentMarking: resetMarking,
         simulationHistory: [],
         isSimulating: false,
@@ -745,6 +700,6 @@ const usePetriNetStore = create((set, get) => ({
     return {};
   }),
 
-}));
+})); 
 
 export default usePetriNetStore;
