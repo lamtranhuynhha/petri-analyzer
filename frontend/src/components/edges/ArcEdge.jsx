@@ -1,5 +1,5 @@
 import React from 'react';
-import { getBezierPath, EdgeLabelRenderer, BaseEdge } from 'reactflow';
+import { getStraightPath, EdgeLabelRenderer, BaseEdge } from 'reactflow';
 import usePetriNetStore from '../../hooks/usePetriNet';
 
 /**
@@ -21,7 +21,7 @@ const ArcEdge = ({
 }) => {
   const { setSelectedElement, weights } = usePetriNetStore();
   
-  const [edgePath, labelX, labelY] = getBezierPath({
+  const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
     sourceY,
     sourcePosition,
@@ -58,7 +58,7 @@ const ArcEdge = ({
         style={{
           ...style,
           stroke: selected ? '#3b82f6' : '#64748b',
-          strokeWidth: selected ? 3 : 2,
+          strokeWidth: selected ? 3 : 1.5,
         }}
         className="arc-edge transition-all duration-200"
       />

@@ -13,6 +13,99 @@ import WelcomeModal from './components/modals/WelcomeModal';
 
 import usePetriNetStore from './hooks/usePetriNet';
 import * as api from './services/api';
+import dagre from 'dagre';
+
+// Auto-layout bằng dagre: sắp xếp các node theo hướng trái -> phải để đồ thị rõ ràng hơn
+const applyDagreLayout = (net, options = {}) => {
+  if (!net) return net;
+
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({
+    rankdir: options.rankdir || 'LR', // Left-to-Right
+    nodesep: options.nodesep || 80,
+    ranksep: options.ranksep || 120,
+  });
+  g.setDefaultEdgeLabel(() => ({}));
+
+  const places = net.places || [];
+  const transitions = net.transitions || [];
+  const arcs = net.arcs || [];
+
+  // Khai báo node với kích thước gần đúng với UI
+  places.forEach((p) => {
+    g.setNode(p.id, { width: 80, height: 80 }); // PlaceNode ~ 80x80
+  });
+
+  transitions.forEach((t) => {
+    g.setNode(t.id, { width: 64, height: 100 }); // TransitionNode ~ 64x100
+  });
+
+  // Khai báo cạnh
+  arcs.forEach((a) => {
+    if (a.source && a.target) {
+      g.setEdge(a.source, a.target);
+    }
+  });
+
+  // Chạy layout
+  dagre.layout(g);
+
+  // Tính bounding box để scale cho phù hợp với kích thước mong muốn
+  const dagreNodes = [
+    ...places.map((p) => ({ id: p.id, n: g.node(p.id) })),
+    ...transitions.map((t) => ({ id: t.id, n: g.node(t.id) })),
+  ].filter(({ n }) => !!n);
+
+  if (dagreNodes.length === 0) {
+    return net;
+  }
+
+  let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+  dagreNodes.forEach(({ n }) => {
+    minX = Math.min(minX, n.x);
+    maxX = Math.max(maxX, n.x);
+    minY = Math.min(minY, n.y);
+    maxY = Math.max(maxY, n.y);
+  });
+
+  const rangeX = maxX - minX || 1;
+  const rangeY = maxY - minY || 1;
+
+  const targetWidth = options.targetWidth || 1200;
+  const targetHeight = options.targetHeight || 700;
+  const marginX = options.marginX || 50;
+  const marginY = options.marginY || 50;
+
+  const scale = Math.min(targetWidth / rangeX, targetHeight / rangeY, 1); // không phóng to quá 1
+
+  const placedPlaces = places.map((p) => {
+    const n = g.node(p.id);
+    if (!n) return p;
+    const x = (n.x - minX) * scale + marginX;
+    const y = (n.y - minY) * scale + marginY;
+    return {
+      ...p,
+      position: { x, y },
+    };
+  });
+
+  const placedTransitions = transitions.map((t) => {
+    const n = g.node(t.id);
+    if (!n) return t;
+    const x = (n.x - minX) * scale + marginX;
+    const y = (n.y - minY) * scale + marginY;
+    return {
+      ...t,
+      position: { x, y },
+    };
+  });
+
+  return {
+    ...net,
+    places: placedPlaces,
+    transitions: placedTransitions,
+  };
+};
 
 /**
  * Main App Component - Assembly tất cả components và xử lý business logic
@@ -22,6 +115,7 @@ function App() {
     resetNet,
     loadPetriNet,
     getPetriNetData,
+    getPetriNetDataGraphic,
     setAnalysisResult,
     setLoading,
     updateStatus,
@@ -99,7 +193,14 @@ function App() {
       const result = await api.uploadPetriNet(file);
       
       if (result.data?.parsed_net) {
-        loadPetriNet(result.data.parsed_net);
+        let net = result.data.parsed_net;
+
+        // Chỉ áp dụng dagre layout cho file PNML (để JSON tự vẽ giữ nguyên vị trí)
+        if (file.name.toLowerCase().endsWith('.pnml')) {
+          net = applyDagreLayout(net);
+        }
+
+        loadPetriNet(net);
         toast.success(`Đã mở file: ${file.name}`);
       }
     } catch (error) {
@@ -112,7 +213,7 @@ function App() {
   
   const handleExport = async (format, options = {}) => {
     try {
-      const data = getPetriNetData();
+      const data = getPetriNetDataGraphic();
       
       if (format === 'json') {
         const exportData = options.includeAnalysis
@@ -128,12 +229,28 @@ function App() {
         URL.revokeObjectURL(url);
         toast.success('Đã export JSON');
       } else if (format === 'pnml') {
-        await api.exportPetriNet(data, 'pnml');
-        // Download file is handled by the API
+        const result = await api.exportPetriNet(data, 'pnml');
+        // Download file from result
+        const blob = result;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `petri-net-export-${Date.now()}.pnml`;
+        a.click();
+        URL.revokeObjectURL(url);
         toast.success('Đã export PNML');
       } else if (format === 'png' || format === 'svg') {
         // Export canvas as image
-        toast.info('Chức năng export ảnh đang được phát triển');
+        const result = await api.exportPetriNet(data, format);
+        // Download file from result
+        const blob = result;
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `petri-net-export-${Date.now()}.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+        toast.success(`Đã export ${format}`);
       } else if (format === 'rg') {
         // Export reachability graph
         toast.info('Chức năng export RG đang được phát triển');
@@ -160,13 +277,36 @@ function App() {
       switch (type) {
         case 'reachability': {
           const result = await api.analyzeReachability(data);
-          setAnalysisResult('reachability', result.result);
+
+          // Hỗ trợ cả hai dạng: { result: {...} } hoặc trả phẳng {...}
+          const rgResult = result?.result || result;
+
+          // Log để dễ debug nếu structure khác kỳ vọng
+          console.log('Reachability analysis raw result:', result);
+          console.log('Reachability parsed rgResult:', rgResult);
+
+          const stateCount = rgResult
+            ? (
+                rgResult.total_states ??
+                (Array.isArray(rgResult.states)
+                  ? rgResult.states.length
+                  : (rgResult.states ? Object.keys(rgResult.states).length : 0))
+              )
+            : 0;
+
+          setAnalysisResult('reachability', rgResult);
           updateStatus({
-            stateCount: result.result?.states?.length || 0,
-            hasWarning: result.result?.truncated || false,
-            warningMessage: result.result?.truncated ? 'State explosion detected' : '',
+            stateCount,
+            hasWarning: rgResult?.truncated || false,
+            warningMessage: rgResult?.truncated ? 'State explosion detected' : '',
           });
-          toast.success(`Đã build RG với ${result.result?.states?.length || 0} states`);
+          toast.success(`Đã build RG với ${stateCount} states`);
+
+          // Nếu backend trả về ảnh đồ thị, mở ở tab mới để xem rõ hơn
+          if (rgResult?.graph_image) {
+            window.open(rgResult.graph_image, '_blank');
+          }
+
           break;
         }
         
