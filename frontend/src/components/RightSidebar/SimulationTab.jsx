@@ -17,6 +17,7 @@ const SimulationTab = () => {
     startAutoPlay,
     stopAutoPlay,
     places,
+    exportTrace,
   } = usePetriNetStore();
   
   const [autoPlaySpeed, setAutoPlaySpeed] = React.useState(1000);
@@ -50,7 +51,7 @@ const SimulationTab = () => {
       
       {/* CURRENT STATE */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">📊 CURRENT STATE</div>
+        <div className="font-semibold text-gray-800 mb-2"> CURRENT STATE</div>
         
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -91,7 +92,7 @@ const SimulationTab = () => {
       {/* ENABLED TRANSITIONS */}
       <div className="card p-3">
         <div className="font-semibold text-gray-800 mb-2">
-          ⚡ ENABLED TRANSITIONS ({enabledTransitions.length})
+           ENABLED TRANSITIONS ({enabledTransitions.length})
         </div>
         
         {enabledTransitions.length > 0 ? (
@@ -118,7 +119,7 @@ const SimulationTab = () => {
               onClick={handleRandomFire}
               className="w-full btn-secondary btn-sm mt-2"
             >
-              ⚡ Random Fire
+               Random Fire
             </button>
           </div>
         ) : (
@@ -130,7 +131,7 @@ const SimulationTab = () => {
       
       {/* AUTO PLAY */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">🎬 AUTO PLAY</div>
+        <div className="font-semibold text-gray-800 mb-2"> AUTO PLAY</div>
         
         <div className="space-y-2">
           <div className="flex gap-2">
@@ -186,7 +187,7 @@ const SimulationTab = () => {
       {/* FIRING HISTORY */}
       <div className="card p-3">
         <div className="flex items-center justify-between mb-2">
-          <div className="font-semibold text-gray-800">📋 FIRING HISTORY</div>
+          <div className="font-semibold text-gray-800"> FIRING HISTORY</div>
           <button
             onClick={() => {
               resetToInitialMarking();
@@ -223,6 +224,7 @@ const SimulationTab = () => {
         
         {simulationHistory.length > 0 && (
           <button
+            onClick={() => exportTrace('txt')}
             className="w-full btn-secondary btn-sm mt-2 flex items-center justify-center gap-2"
           >
             <FaFileExport />
