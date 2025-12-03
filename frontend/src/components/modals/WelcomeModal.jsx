@@ -3,10 +3,10 @@ import { FaTimes, FaGithub, FaFilePdf } from 'react-icons/fa';
 import usePetriNetStore from '../../hooks/usePetriNet';
 
 const WelcomeModal = () => {
-  const { modals, closeModal } = usePetriNetStore();
+  const { modals = {}, closeModal } = usePetriNetStore();
   
   // Kiểm tra trạng thái modal 'welcome'
-  if (!modals.welcome) return null;
+  if (!modals?.welcome) return null;
   
   return (
     <div className="modal-backdrop" onClick={() => closeModal('welcome')}>
@@ -35,7 +35,7 @@ const WelcomeModal = () => {
           <div className="space-y-3">
             {/* Github Link */}
             <a 
-              href="https://github.com/lamtranhuynhha/petri-analyzer" // Thay link của bạn vào đây
+              href="https://github.com/lamtranhuynhha/petri-analyzer"
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-gray-800 hover:bg-gray-50 transition-all group"

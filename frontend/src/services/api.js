@@ -86,7 +86,7 @@ export const exportPetriNet = async (netData, format) => {
     net_data: netData,
     format,
   }, {
-    responseType: format == 'pnml' || format === 'png' || format === 'svg' ? 'blob' : 'json',
+    responseType: format === 'pnml' || format === 'png' || format === 'svg' ? 'blob' : 'json',
   });
 };
 
@@ -225,7 +225,7 @@ export const healthCheck = async () => {
   return await apiClient.get('/health');
 };
 
-export default {
+const api = {
   uploadPetriNet,
   convertFormat,
   exportPetriNet,
@@ -241,5 +241,7 @@ export default {
   fireTransition,
   healthCheck,
 };
+
+export default api;
 
 

@@ -14,10 +14,12 @@ const TOKEN_FONT_SIZE = Math.round(PLACE_RADIUS * 0.6);
  * Hiển thị hình tròn lớn với token count và label
  */
 const PlaceNode = ({ id, data, selected }) => {
-  const { updatePlace, setSelectedElement, currentMarking, selectedTool, firstSelectedNode } = usePetriNetStore();
+  const { setSelectedElement, currentMarking = {}, selectedTool, firstSelectedNode } = usePetriNetStore();
   
-  // Lấy số token hiện tại (ưu tiên từ simulation marking)
-  const tokens = currentMarking[id] !== undefined ? currentMarking[id] : (data.tokens || 0);
+  // Lấy số token hiện tại (ưu tiên từ simulation marking) - với null safety
+  const tokens = (currentMarking && currentMarking[id] !== undefined) 
+    ? currentMarking[id] 
+    : (data?.tokens || 0);
   
   // Kiểm tra nếu node đang được chọn để tạo arc
   const isArcSource = selectedTool === 'arc' && firstSelectedNode?.id === id;
@@ -43,7 +45,7 @@ const PlaceNode = ({ id, data, selected }) => {
       const dxSmall = PLACE_RADIUS * 0.45;
       const dySmall = PLACE_RADIUS * 0.3;
       const dxLarge = PLACE_RADIUS * 0.55;
-      const dyLarge = PLACE_RADIUS * 0.55;
+      //const dyLarge = PLACE_RADIUS * 0.55;
 
       if (tokens === 1) pos = [[0, 0]];
       else if (tokens === 2) pos = [[-dxSmall, 0], [dxSmall, 0]];

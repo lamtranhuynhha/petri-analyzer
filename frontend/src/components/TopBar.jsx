@@ -1,24 +1,27 @@
 import React, { useRef } from 'react';
 import logoImage from '../assets/hcmut.png';
-import { FaFile, FaFolderOpen, FaSave, FaDownload, FaChartBar, FaPlay, FaInfoCircle } from 'react-icons/fa';
+import { FaFile, FaFolderOpen, FaSave, FaDownload, FaInfoCircle } from 'react-icons/fa';
 import usePetriNetStore from '../hooks/usePetriNet';
 
 /**
  * Top Bar Component - Header với file operations, mode buttons, và status
  */
 const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
+  const [showExportMenu, setShowExportMenu] = React.useState(false);
+  const fileInputRef = useRef(null);
+  
   const { 
-    status, 
-    setActiveTab, 
-    activeTab,
-    places,
-    transitions,
+    status = {},
+    places = [],
+    transitions = [],
     openModal,
     setConfirmAction,
   } = usePetriNetStore();
   
-  const [showExportMenu, setShowExportMenu] = React.useState(false);
-  const fileInputRef = useRef(null);
+  if (!openModal || !setConfirmAction) {
+    console.error('TopBar: Missing required functions from store');
+    return null;
+  }
   
   const handleNew = () => {
     setConfirmAction({
@@ -159,21 +162,21 @@ const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
         <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded">
           <span className="font-medium text-gray-600">Elements:</span>
           <span className="text-gray-800">
-            {places.length}P, {transitions.length}T
+            {places?.length || 0}P, {transitions?.length || 0}T
           </span>
         </div>
         
-        {status.stateCount > 0 && (
+        {status?.stateCount > 0 && (
           <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded">
             <span className="font-medium text-gray-600">States:</span>
             <span className="text-gray-800">{status.stateCount}</span>
           </div>
         )}
         
-        {status.hasWarning && (
+        {status?.hasWarning && (
           <div className="flex items-center gap-2 px-3 py-1 bg-yellow-100 rounded text-yellow-700">
             <FaInfoCircle />
-            <span className="text-xs font-medium">{status.warningMessage || 'State explosion'}</span>
+            <span className="text-xs font-medium">{status?.warningMessage || 'State explosion'}</span>
           </div>
         )}
       </div>

@@ -6,13 +6,13 @@ import usePetriNetStore from '../../hooks/usePetriNet';
  * Reachability Graph Modal - Hiển thị RG với zoom, pan, legend
  */
 const ReachabilityGraphModal = () => {
-  const { modals, closeModal, analysisResults } = usePetriNetStore();
+  const { modals = {}, closeModal, analysisResults = {} } = usePetriNetStore();
   const [zoom, setZoom] = React.useState(100);
   const [showLegend, setShowLegend] = React.useState(true);
   
-  if (!modals.reachabilityGraph) return null;
+  if (!modals?.reachabilityGraph) return null;
   
-  const rgData = analysisResults.reachability;
+  const rgData = analysisResults?.reachability || null;
   
   if (!rgData) {
     return (

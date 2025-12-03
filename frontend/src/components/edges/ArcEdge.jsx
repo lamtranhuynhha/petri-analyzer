@@ -19,7 +19,7 @@ const ArcEdge = ({
   data,
   selected,
 }) => {
-  const { setSelectedElement, weights } = usePetriNetStore();
+  const { setSelectedElement, weights = {} } = usePetriNetStore();
   
   const [edgePath, labelX, labelY] = getStraightPath({
     sourceX,
@@ -35,8 +35,8 @@ const ArcEdge = ({
   
   const handleClick = () => {
     // Get the weight from the store to ensure it's up to date
-    const weightKey = JSON.stringify([data.source, data.target]);
-    const currentWeight = weights[weightKey] || data.weight || 1;
+    const weightKey = JSON.stringify([data?.source, data?.target]);
+    const currentWeight = weights[weightKey] || data?.weight || 1;
     
     setSelectedElement({
       type: 'arc',

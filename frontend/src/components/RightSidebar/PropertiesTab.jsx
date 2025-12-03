@@ -14,11 +14,11 @@ const PropertiesTab = () => {
     deletePlace,
     deleteTransition,
     deleteArc,
-    arcs,
-    places,
-    transitions,
+    arcs = [],
+    places = [],
+    transitions = [],
     getEnabledTransitions,
-    analysisResults,
+    analysisResults = {},
   } = usePetriNetStore();
   
   if (!selectedElement) {
@@ -44,8 +44,8 @@ const PropertiesTab = () => {
     };
     
     // Tìm connections
-    const inputArcs = arcs.filter(a => a.target === id);
-    const outputArcs = arcs.filter(a => a.source === id);
+    const inputArcs = arcs.filter(a => a?.target === id);
+    const outputArcs = arcs.filter(a => a?.source === id);
     
     return (
       <div className="p-4 space-y-4">
@@ -154,11 +154,11 @@ const PropertiesTab = () => {
       updateTransition(id, { label: value });
     };
     
-    const inputArcs = arcs.filter(a => a.target === id);
-    const outputArcs = arcs.filter(a => a.source === id);
-    const enabledTransitions = getEnabledTransitions();
-    const isEnabled = enabledTransitions.some(t => t.id === id);
-    const livenessLevel = data.livenessLevel || analysisResults.liveness?.details?.[id];
+    const inputArcs = arcs.filter(a => a?.target === id);
+    const outputArcs = arcs.filter(a => a?.source === id);
+    const enabledTransitions = getEnabledTransitions() || [];
+    const isEnabled = enabledTransitions.some(t => t?.id === id);
+    const livenessLevel = data?.livenessLevel || analysisResults?.liveness?.details?.[id];
     
     return (
       <div className="p-4 space-y-4">

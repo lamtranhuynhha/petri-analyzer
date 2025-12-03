@@ -7,14 +7,16 @@ import usePetriNetStore from '../../hooks/usePetriNet';
  * Hiển thị hình chữ nhật lớn với color coding theo liveness level
  */
 const TransitionNode = ({ id, data, selected }) => {
-  const { setSelectedElement, getEnabledTransitions, analysisResults, selectedTool, firstSelectedNode } = usePetriNetStore();
+  const { setSelectedElement, getEnabledTransitions, analysisResults = {}, selectedTool, firstSelectedNode } = usePetriNetStore();
   
-  // Kiểm tra transition có enabled không
-  const enabledTransitions = getEnabledTransitions();
-  const isEnabled = enabledTransitions.some(t => t.id === id);
+  // Kiểm tra transition có enabled không - với null safety
+  const enabledTransitions = (getEnabledTransitions && typeof getEnabledTransitions === 'function') 
+    ? (getEnabledTransitions() || []) 
+    : [];
+  const isEnabled = Array.isArray(enabledTransitions) && enabledTransitions.some(t => t?.id === id);
   
   // Lấy liveness level từ analysis results
-  const livenessLevel = analysisResults.liveness?.details?.[id] || null;
+  const livenessLevel = analysisResults?.liveness?.details?.[id] || null;
   
   // Kiểm tra nếu node đang được chọn để tạo arc
   const isArcSource = selectedTool === 'arc' && firstSelectedNode?.id === id;
@@ -40,10 +42,10 @@ const TransitionNode = ({ id, data, selected }) => {
     return isEnabled ? '#10b981' : '#1e293b';
   };
   
-  const getStatusIndicator = () => {
-    if (isEnabled) return '✓';
-    return '';
-  };
+  // const getStatusIndicator = () => {
+  //   if (isEnabled) return '✓';
+  //   return '';
+  // };
   
   return (
     <div
@@ -64,9 +66,19 @@ const TransitionNode = ({ id, data, selected }) => {
           border: `1px solid ${isArcSource ? '#10b981' : (selected ? '#3b82f6' : '#475569')}`,
         }}
       >
+        {/* Status indicator */}
+        {isEnabled && (
+          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center text-white text-xs">
+            ✓
+          </div>
+        )}
         
-        
-        
+        {/* Liveness indicator (nếu có) */}
+        {livenessLevel && (
+          <div className="absolute -top-2 -left-2 px-1 text-xs bg-white rounded shadow text-gray-700 font-semibold">
+            {livenessLevel}
+          </div>
+        )}
       </div>
       
       {/* Label */}

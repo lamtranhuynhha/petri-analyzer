@@ -24,6 +24,7 @@ const usePetriNetStore = create((set, get) => ({
     coverabilityTree: false,
     export: false,
     confirm: false,
+    welcome: false,
   },
   confirmAction: null,
   
@@ -66,16 +67,22 @@ const usePetriNetStore = create((set, get) => ({
   },
   
   // ============ ACTIONS - Model Management ============
-  
-  addPlace: (place) => set((state) => {
+  // PLACES: addPlace, updatePlace, deletePlace
+  addPlace: (place) => {
+    const state = get();
+    
+    if (!place || !place.id) {
+      console.error('Invalid place data:', place);
+      return;
+    }
+    
     if (state.isSimulating) {
       console.warn('Cannot add place while auto play is running. Please pause first.');
-      return state;
+      return;
     }
 
     const newMarking = { ...state.initialMarking, [place.id]: place.tokens || 0 };
-    
-    const shouldReset = state.simulationHistory.length > 0;
+    const shouldReset = state.simulationHistory && state.simulationHistory.length > 0;
     
     if (shouldReset) {
       const resetPlaces = state.places.map(p => ({
@@ -92,29 +99,41 @@ const usePetriNetStore = create((set, get) => ({
         clearInterval(state.autoPlayInterval);
       }
       
-      get().saveToHistory();
-      
-      return {
+      set({
         places: resetPlaces,
         initialMarking: newMarking,
         currentMarking: newMarking,
         simulationHistory: [],
         isSimulating: false,
         autoPlayInterval: null,
-        status: { ...state.status, elementCount: { ...state.status.elementCount, places: resetPlaces.length } }
-      };
+        status: { 
+          ...state.status, 
+          elementCount: { 
+            ...state.status.elementCount, 
+            places: resetPlaces.length 
+          } 
+        }
+      });
+    } else {
+      const newPlaces = [...state.places, place];
+      
+      set({
+        places: newPlaces,
+        initialMarking: newMarking,
+        currentMarking: { ...state.currentMarking, [place.id]: place.tokens || 0 },
+        status: { 
+          ...state.status, 
+          elementCount: { 
+            ...state.status.elementCount, 
+            places: newPlaces.length 
+          } 
+        }
+      });
     }
     
-    const newPlaces = [...state.places, place];
+    // Save to history after state is updated
     get().saveToHistory();
-    
-    return {
-      places: newPlaces,
-      initialMarking: newMarking,
-      currentMarking: { ...state.currentMarking, [place.id]: place.tokens || 0 },
-      status: { ...state.status, elementCount: { ...state.status.elementCount, places: newPlaces.length } }
-    };
-  }),
+  },
 
   updatePlace: (id, updates) => set((state) => {
     if (state.isSimulating) {
@@ -153,7 +172,7 @@ const usePetriNetStore = create((set, get) => ({
             data: { 
               ...state.selectedElement.data, 
               ...updates,
-              tokens: updates.tokens !== undefined ? Number(updates.tokens) : state.selectedElement.data.tokens
+              tokens: updates.tokens !== undefined ? Number(updates.tokens) : state.selectedElement?.data?.tokens
             } 
           } 
         : state.selectedElement
@@ -161,6 +180,7 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   deletePlace: (id) => set((state) => {
+    if (!id) return state;
     if (state.isSimulating) {
       console.warn('Cannot delete place while auto play is running. Please pause first.');
       return state;
@@ -197,20 +217,65 @@ const usePetriNetStore = create((set, get) => ({
     };
   }),
 
-  addTransition: (transition) => set((state) => {
+  // TRANSITIONS: addTransition, updateTransition, deleteTransition
+
+  addTransition: (transition) => {
+    const state = get();
+    
+    if (!transition || !transition.id) {
+      console.error('Invalid transition data:', transition);
+      return;
+    }
+    
     if (state.isSimulating) {
       console.warn('Cannot add transition while auto play is running. Please pause first.');
-      return state;
+      return;
     }
-    get().resetSimulationIfModelChanged();
-
-    const newTransitions = [...state.transitions, transition];
+    
+    // Reset simulation if needed
+    const shouldReset = state.simulationHistory && state.simulationHistory.length > 0;
+    
+    if (shouldReset) {
+      const resetPlaces = state.places.map(p => ({
+        ...p,
+        tokens: state.initialMarking[p.id] || 0
+      }));
+      
+      if (state.autoPlayInterval) {
+        clearInterval(state.autoPlayInterval);
+      }
+      
+      set({
+        places: resetPlaces,
+        currentMarking: { ...state.initialMarking },
+        simulationHistory: [],
+        isSimulating: false,
+        autoPlayInterval: null,
+        transitions: [...state.transitions, transition],
+        status: { 
+          ...state.status, 
+          elementCount: { 
+            ...state.status.elementCount, 
+            transitions: state.transitions.length + 1 
+          } 
+        }
+      });
+    } else {
+      set({
+        transitions: [...state.transitions, transition],
+        status: { 
+          ...state.status, 
+          elementCount: { 
+            ...state.status.elementCount, 
+            transitions: state.transitions.length + 1 
+          } 
+        }
+      });
+    }
+    
+    // Save to history after state is updated
     get().saveToHistory();
-    return {
-      transitions: newTransitions,
-      status: { ...state.status, elementCount: { ...state.status.elementCount, transitions: newTransitions.length } }
-    };
-  }),
+  },
 
   updateTransition: (id, updates) => set((state) => {
     if (state.isSimulating) {
@@ -257,17 +322,34 @@ const usePetriNetStore = create((set, get) => ({
     };
   }),
 
+  // ARCS: addArc, updateArc, deleteArc
+
   addArc: (arc) => set((state) => {
     if (state.isSimulating) {
       console.warn('Cannot add arc while auto play is running. Please pause first.');
       return state;
     }
-    get().resetSimulationIfModelChanged();
+
+    const store = get();
+    if (!store) {
+      console.error('usePetriNetStore.get() returned undefined in addArc');
+      return state;
+    }
+
+    if (typeof store.resetSimulationIfModelChanged === 'function') {
+      store.resetSimulationIfModelChanged();
+    }
 
     const newArcs = [...state.arcs, arc];
     const weightKey = JSON.stringify([arc.source, arc.target]);
     const newWeights = { ...state.weights, [weightKey]: arc.weight || 1 };
-    get().saveToHistory();
+
+    if (typeof store.saveToHistory === 'function') {
+      store.saveToHistory();
+    } else {
+      console.error('saveToHistory is not available on store in addArc');
+    }
+
     return { arcs: newArcs, weights: newWeights };
   }),
 
@@ -466,10 +548,15 @@ const usePetriNetStore = create((set, get) => ({
       initialMarking: state.initialMarking,
     };
 
-    const newHistory = state.history.slice(0, state.historyIndex + 1);
+    // Initialize history if it doesn't exist
+    const currentHistory = Array.isArray(state.history) ? state.history : [];
+    const currentIndex = typeof state.historyIndex === 'number' ? state.historyIndex : -1;
+    
+    const newHistory = currentHistory.slice(0, currentIndex + 1);
     newHistory.push(snapshot);
 
-    if (newHistory.length > state.maxHistory) {
+    const maxHistory = typeof state.maxHistory === 'number' ? state.maxHistory : 50;
+    if (newHistory.length > maxHistory) {
       newHistory.shift();
     }
 
@@ -480,39 +567,55 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   undo: () => set((state) => {
-    if (state.historyIndex <= 0) return state;
+    const history = Array.isArray(state.history) ? state.history : [];
+    const historyIndex = typeof state.historyIndex === 'number' ? state.historyIndex : -1;
+    
+    if (historyIndex <= 0 || history.length === 0) return state;
 
-    const newIndex = state.historyIndex - 1;
-    const snapshot = state.history[newIndex];
+    const newIndex = Math.max(0, historyIndex - 1);
+    const snapshot = history[newIndex] || {};
 
     return {
       ...snapshot,
+      history,
       historyIndex: newIndex,
-      currentMarking: { ...snapshot.initialMarking },
+      currentMarking: { ...(snapshot.initialMarking || {}) },
+      simulationHistory: [],
+      isSimulating: false,
     };
   }),
 
   redo: () => set((state) => {
-    if (state.historyIndex >= state.history.length - 1) return state;
+    const history = Array.isArray(state.history) ? state.history : [];
+    const historyIndex = typeof state.historyIndex === 'number' ? state.historyIndex : -1;
+    
+    if (historyIndex >= history.length - 1 || history.length === 0) return state;
 
-    const newIndex = state.historyIndex + 1;
-    const snapshot = state.history[newIndex];
+    const newIndex = Math.min(history.length - 1, historyIndex + 1);
+    const snapshot = history[newIndex] || {};
 
     return {
       ...snapshot,
+      history,
       historyIndex: newIndex,
-      currentMarking: { ...snapshot.initialMarking },
+      currentMarking: { ...(snapshot.initialMarking || {}) },
+      simulationHistory: [],
+      isSimulating: false,
     };
   }),
 
   canUndo: () => {
     const state = get();
-    return state.historyIndex > 0;
+    const history = Array.isArray(state.history) ? state.history : [];
+    const historyIndex = typeof state.historyIndex === 'number' ? state.historyIndex : -1;
+    return historyIndex > 0 && history.length > 0;
   },
 
   canRedo: () => {
     const state = get();
-    return state.historyIndex < state.history.length - 1;
+    const history = Array.isArray(state.history) ? state.history : [];
+    const historyIndex = typeof state.historyIndex === 'number' ? state.historyIndex : -1;
+    return historyIndex < history.length - 1 && history.length > 0;
   },
 
   // ============ ACTIONS - Import/Export ============

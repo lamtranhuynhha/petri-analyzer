@@ -19,12 +19,23 @@ import ArcEdge from './edges/ArcEdge';
 
 // Hàm helper để tạo Label tự động tăng (p1, p2, t1, t2...)
 const generateNextLabel = (prefix, elements) => {
+  if (!prefix || typeof prefix !== 'string') {
+    console.error('Invalid prefix for generateNextLabel:', prefix);
+    return `${prefix || 'x'}1`;
+  }
+  
+  if (!Array.isArray(elements)) {
+    console.warn('Elements is not an array, using default index');
+    return `${prefix}1`;
+  }
+  
   let maxIndex = 0;
   
   elements.forEach(el => {
+    if (!el) return;
     // Kiểm tra xem label hiện tại có bắt đầu bằng prefix không (ví dụ "p1" bắt đầu bằng "p")
-    const label = el.label || '';
-    if (label.startsWith(prefix)) {
+    const label = el.label || el.id || '';
+    if (typeof label === 'string' && label.startsWith(prefix)) {
       // Lấy phần số phía sau (ví dụ "p12" -> 12)
       const numberPart = parseInt(label.substring(prefix.length));
       if (!isNaN(numberPart) && numberPart > maxIndex) {
@@ -59,7 +70,7 @@ const CanvasEditor = () => {
   const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = React.useState(null);
-  const [arcCreationMode, setArcCreationMode] = React.useState(false);
+  //const [arcCreationMode, setArcCreationMode] = React.useState(false);
 
   const nodeTypes = useMemo(() => ({
     place: PlaceNode,
@@ -95,22 +106,42 @@ const CanvasEditor = () => {
   }, []);
 
   useEffect(() => {
+    if (!Array.isArray(places) || !Array.isArray(transitions) || !Array.isArray(arcs)) {
+      console.error('Invalid data types:', { places, transitions, arcs });
+      return;
+    }
+
     const newNodes = [
-      ...places.map((p) => ({
-        id: p.id,
-        type: 'place',
-        position: p.position || { x: 0, y: 0 },
-        data: { label: p.label, tokens: p.tokens },
-      })),
-      ...transitions.map((t) => ({
-        id: t.id,
-        type: 'transition',
-        position: t.position || { x: 0, y: 0 },
-        data: { label: t.label, livenessLevel: t.livenessLevel },
-      })),
+      ...places.map((p) => {
+        if (!p || !p.id) {
+          console.warn('Invalid place:', p);
+          return null;
+        }
+        return {
+          id: p.id,
+          type: 'place',
+          position: p.position || { x: 0, y: 0 },
+          data: { label: p.label, tokens: p.tokens },
+        };
+      }).filter(Boolean),
+      ...transitions.map((t) => {
+        if (!t || !t.id) {
+          console.warn('Invalid transition:', t);
+          return null;
+        }
+        return {
+          id: t.id,
+          type: 'transition',
+          position: t.position || { x: 0, y: 0 },
+          data: { label: t.label, livenessLevel: t.livenessLevel },
+        };
+      }).filter(Boolean),
     ];
 
-    if (JSON.stringify(newNodes.map(n => n.id)) !== JSON.stringify(nodes.map(n => n.id))) {
+    const nodeIds = newNodes.map(n => n.id).sort().join(',');
+    const currentNodeIds = nodes.map(n => n.id).sort().join(',');
+
+    if (nodeIds !== currentNodeIds) {
        setNodes(newNodes);
     } else {
        setNodes((nds) => nds.map(node => {
@@ -121,6 +152,11 @@ const CanvasEditor = () => {
     }
 
     const newEdges = arcs.map((arc) => {
+      if (!arc || !arc.id || !arc.source || !arc.target) {
+        console.warn('Invalid arc:', arc);
+        return null;
+      }
+      
       const sourceNode = newNodes.find((n) => n.id === arc.source);
       const targetNode = newNodes.find((n) => n.id === arc.target);
       const { sourceHandle, targetHandle } = getHandleIdsForArc(sourceNode, targetNode);
@@ -135,10 +171,10 @@ const CanvasEditor = () => {
         markerEnd: { type: MarkerType.Arrow, width: 20, height: 20 },
         data: { weight: arc.weight },
       };
-    });
+    }).filter(Boolean);
     
     setEdges(newEdges);
-  }, [places, transitions, arcs, setNodes, setEdges, getHandleIdsForArc]);
+  }, [places, transitions, arcs, setNodes, setEdges, getHandleIdsForArc, nodes]);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -182,13 +218,28 @@ const CanvasEditor = () => {
       return;
     }
 
+    if (!event || !event.clientX || !event.clientY) {
+      console.error('Invalid event in onPaneClick:', event);
+      return;
+    }
+
     const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
     });
 
+    if (!position || typeof position.x !== 'number' || typeof position.y !== 'number') {
+      console.error('Invalid position calculated:', position);
+      return;
+    }
+
     if (selectedTool === 'place') {
-      const nextLabel = generateNextLabel('p', places);
+      if (!addPlace || typeof addPlace !== 'function') {
+        console.error('addPlace is not a function');
+        return;
+      }
+      
+      const nextLabel = generateNextLabel('p', places || []);
       const id = nextLabel; 
 
       addPlace({
@@ -198,7 +249,12 @@ const CanvasEditor = () => {
         position,
       });
     } else if (selectedTool === 'transition') {
-      const nextLabel = generateNextLabel('t', transitions);
+      if (!addTransition || typeof addTransition !== 'function') {
+        console.error('addTransition is not a function');
+        return;
+      }
+      
+      const nextLabel = generateNextLabel('t', transitions || []);
       const id = nextLabel;
 
       addTransition({
@@ -259,7 +315,7 @@ const CanvasEditor = () => {
         data: node.data,
       });
     }
-  }, [selectedTool, updatePlace, setSelectedElement, firstSelectedNode, arcs, addArc]);
+  }, [selectedTool, updatePlace, setSelectedElement, firstSelectedNode, arcs, addArc, setFirstSelectedNode]);
 
   const onNodesDelete = useCallback(
     (nodesToDelete) => {
@@ -286,7 +342,7 @@ const CanvasEditor = () => {
   );
 
   return (
-    <div className="flex-1 relative" ref={reactFlowWrapper}>
+    <div className="flex-1 relative overflow-hidden" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -306,6 +362,7 @@ const CanvasEditor = () => {
         snapToGrid
         minZoom={0.1}
         className="bg-canvas-bg"
+        style={{ width: '100%', height: '100%' }}
         nodesConnectable={false}
         nodesDraggable={selectedTool === 'select'}
       >
@@ -318,7 +375,7 @@ const CanvasEditor = () => {
       </ReactFlow>
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded shadow text-sm text-gray-600 border border-gray-200">
-        Mode: <strong>{selectedTool.toUpperCase()}</strong>
+        Mode: <strong>{selectedTool ? selectedTool.toUpperCase() : 'SELECT'}</strong>
         {selectedTool === 'token' && <span className="ml-2 text-xs text-gray-500">(Click: +1, Shift+Click: -1)</span>}
         {selectedTool === 'arc' && (
           <span className="ml-2 text-xs text-blue-600">
