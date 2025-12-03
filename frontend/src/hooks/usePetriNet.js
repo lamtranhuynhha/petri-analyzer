@@ -540,27 +540,44 @@ const usePetriNetStore = create((set, get) => ({
   // ============ ACTIONS - History (Undo/Redo) ============
 
   saveToHistory: () => set((state) => {
+    if (!state) {
+      console.error('saveToHistory called with undefined state');
+      return state;
+    }
+
+    const {
+      places = [],
+      transitions = [],
+      arcs = [],
+      weights = {},
+      initialMarking = {},
+      history,
+      historyIndex,
+      maxHistory,
+    } = state;
+
     const snapshot = {
-      places: state.places,
-      transitions: state.transitions,
-      arcs: state.arcs,
-      weights: state.weights,
-      initialMarking: state.initialMarking,
+      places,
+      transitions,
+      arcs,
+      weights,
+      initialMarking,
     };
 
     // Initialize history if it doesn't exist
-    const currentHistory = Array.isArray(state.history) ? state.history : [];
-    const currentIndex = typeof state.historyIndex === 'number' ? state.historyIndex : -1;
+    const currentHistory = Array.isArray(history) ? history : [];
+    const currentIndex = typeof historyIndex === 'number' ? historyIndex : -1;
     
     const newHistory = currentHistory.slice(0, currentIndex + 1);
     newHistory.push(snapshot);
 
-    const maxHistory = typeof state.maxHistory === 'number' ? state.maxHistory : 50;
-    if (newHistory.length > maxHistory) {
+    const maxHistorySafe = typeof maxHistory === 'number' ? maxHistory : 50;
+    if (newHistory.length > maxHistorySafe) {
       newHistory.shift();
     }
 
     return {
+      ...state,
       history: newHistory,
       historyIndex: newHistory.length - 1,
     };

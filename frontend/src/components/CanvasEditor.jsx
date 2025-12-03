@@ -19,23 +19,12 @@ import ArcEdge from './edges/ArcEdge';
 
 // Hàm helper để tạo Label tự động tăng (p1, p2, t1, t2...)
 const generateNextLabel = (prefix, elements) => {
-  if (!prefix || typeof prefix !== 'string') {
-    console.error('Invalid prefix for generateNextLabel:', prefix);
-    return `${prefix || 'x'}1`;
-  }
-  
-  if (!Array.isArray(elements)) {
-    console.warn('Elements is not an array, using default index');
-    return `${prefix}1`;
-  }
-  
   let maxIndex = 0;
   
   elements.forEach(el => {
-    if (!el) return;
     // Kiểm tra xem label hiện tại có bắt đầu bằng prefix không (ví dụ "p1" bắt đầu bằng "p")
-    const label = el.label || el.id || '';
-    if (typeof label === 'string' && label.startsWith(prefix)) {
+    const label = el.label || '';
+    if (label.startsWith(prefix)) {
       // Lấy phần số phía sau (ví dụ "p12" -> 12)
       const numberPart = parseInt(label.substring(prefix.length));
       if (!isNaN(numberPart) && numberPart > maxIndex) {
@@ -61,17 +50,15 @@ const CanvasEditor = () => {
     setSelectedElement,
     deleteArc,
     deletePlace,
-    deleteTransition,
-    firstSelectedNode,
-    setFirstSelectedNode
+    deleteTransition
   } = usePetriNetStore();
   
   const reactFlowWrapper = useRef(null);
   const [nodes, setNodes] = useNodesState([]);
   const [edges, setEdges] = useEdgesState([]);
   const [reactFlowInstance, setReactFlowInstance] = React.useState(null);
-  //const [arcCreationMode, setArcCreationMode] = React.useState(false);
 
+  // ... (Giữ nguyên phần nodeTypes, edgeTypes, useEffect sync data như câu trả lời trước) ...
   const nodeTypes = useMemo(() => ({
     place: PlaceNode,
     transition: TransitionNode,
@@ -81,100 +68,40 @@ const CanvasEditor = () => {
     arc: ArcEdge,
   }), []);
 
-  // Xác định handle (điểm nối) phù hợp dựa trên vị trí tương đối giữa hai node
-  const getHandleIdsForArc = useCallback((sourceNode, targetNode) => {
-    if (!sourceNode || !targetNode) {
-      return { sourceHandle: undefined, targetHandle: undefined };
-    }
-
-    const dx = (targetNode.position?.x || 0) - (sourceNode.position?.x || 0);
-    const dy = (targetNode.position?.y || 0) - (sourceNode.position?.y || 0);
-
-    if (Math.abs(dx) > Math.abs(dy)) {
-      // Nối theo phương ngang
-      if (dx >= 0) {
-        return { sourceHandle: 'right-source', targetHandle: 'left-target' };
-      }
-      return { sourceHandle: 'left-source', targetHandle: 'right-target' };
-    } else {
-      // Nối theo phương dọc
-      if (dy >= 0) {
-        return { sourceHandle: 'bottom-source', targetHandle: 'top-target' };
-      }
-      return { sourceHandle: 'top-source', targetHandle: 'bottom-target' };
-    }
-  }, []);
-
+  // Sync Store -> React Flow (robust với dữ liệu undefined)
   useEffect(() => {
-    if (!Array.isArray(places) || !Array.isArray(transitions) || !Array.isArray(arcs)) {
-      console.error('Invalid data types:', { places, transitions, arcs });
-      return;
-    }
+    const safePlaces = Array.isArray(places) ? places : [];
+    const safeTransitions = Array.isArray(transitions) ? transitions : [];
+    const safeArcs = Array.isArray(arcs) ? arcs : [];
 
     const newNodes = [
-      ...places.map((p) => {
-        if (!p || !p.id) {
-          console.warn('Invalid place:', p);
-          return null;
-        }
-        return {
-          id: p.id,
-          type: 'place',
-          position: p.position || { x: 0, y: 0 },
-          data: { label: p.label, tokens: p.tokens },
-        };
-      }).filter(Boolean),
-      ...transitions.map((t) => {
-        if (!t || !t.id) {
-          console.warn('Invalid transition:', t);
-          return null;
-        }
-        return {
-          id: t.id,
-          type: 'transition',
-          position: t.position || { x: 0, y: 0 },
-          data: { label: t.label, livenessLevel: t.livenessLevel },
-        };
-      }).filter(Boolean),
+      ...safePlaces.map((p) => ({
+        id: p.id,
+        type: 'place',
+        position: p.position || { x: 0, y: 0 },
+        data: { label: p.label, tokens: p.tokens },
+      })),
+      ...safeTransitions.map((t) => ({
+        id: t.id,
+        type: 'transition',
+        position: t.position || { x: 0, y: 0 },
+        data: { label: t.label, livenessLevel: t.livenessLevel },
+      })),
     ];
 
-    const nodeIds = newNodes.map(n => n.id).sort().join(',');
-    const currentNodeIds = nodes.map(n => n.id).sort().join(',');
+    setNodes(newNodes);
 
-    if (nodeIds !== currentNodeIds) {
-       setNodes(newNodes);
-    } else {
-       setNodes((nds) => nds.map(node => {
-         const source = newNodes.find(n => n.id === node.id);
-         if (source) return { ...node, data: source.data };
-         return node;
-       }));
-    }
-
-    const newEdges = arcs.map((arc) => {
-      if (!arc || !arc.id || !arc.source || !arc.target) {
-        console.warn('Invalid arc:', arc);
-        return null;
-      }
-      
-      const sourceNode = newNodes.find((n) => n.id === arc.source);
-      const targetNode = newNodes.find((n) => n.id === arc.target);
-      const { sourceHandle, targetHandle } = getHandleIdsForArc(sourceNode, targetNode);
-
-      return {
-        id: arc.id,
-        source: arc.source,
-        target: arc.target,
-        sourceHandle,
-        targetHandle,
-        type: 'arc',
-        markerEnd: { type: MarkerType.Arrow, width: 20, height: 20 },
-        data: { weight: arc.weight },
-      };
-    }).filter(Boolean);
+    const newEdges = safeArcs.map((arc) => ({
+      id: arc.id,
+      source: arc.source,
+      target: arc.target,
+      type: 'arc',
+      markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
+      data: { weight: arc.weight, source: arc.source, target: arc.target },
+    }));
     
     setEdges(newEdges);
-  }, [places, transitions, arcs, setNodes, setEdges, getHandleIdsForArc, nodes]);
+  }, [places, transitions, arcs, setNodes, setEdges]);
 
   const onNodesChange = useCallback(
     (changes) => setNodes((nds) => applyNodeChanges(changes, nds)),
@@ -210,6 +137,7 @@ const CanvasEditor = () => {
     });
   }, [reactFlowInstance, addArc]);
 
+  // --- PHẦN QUAN TRỌNG ĐÃ CHỈNH SỬA: Tạo ID và Label tuần tự ---
   const onPaneClick = useCallback((event) => {
     if (!reactFlowInstance || !selectedTool) return;
     
@@ -218,43 +146,28 @@ const CanvasEditor = () => {
       return;
     }
 
-    if (!event || !event.clientX || !event.clientY) {
-      console.error('Invalid event in onPaneClick:', event);
-      return;
-    }
-
     const position = reactFlowInstance.screenToFlowPosition({
         x: event.clientX,
         y: event.clientY,
     });
 
-    if (!position || typeof position.x !== 'number' || typeof position.y !== 'number') {
-      console.error('Invalid position calculated:', position);
-      return;
-    }
-
     if (selectedTool === 'place') {
-      if (!addPlace || typeof addPlace !== 'function') {
-        console.error('addPlace is not a function');
-        return;
-      }
-      
-      const nextLabel = generateNextLabel('p', places || []);
+      // 1. Tạo label tuần tự: p1, p2...
+      const nextLabel = generateNextLabel('p', places);
+      // 2. ID vẫn nên là unique để tránh lỗi React Flow, nhưng có thể dùng label làm ID nếu muốn
+      // Ở đây tôi dùng label làm ID luôn cho đẹp, nhưng bạn phải đảm bảo không bao giờ trùng.
+      // Để an toàn nhất: ID = label (nếu quản lý tốt) hoặc ID = `p-${Date.now()}`
       const id = nextLabel; 
 
       addPlace({
         id: id,
-        label: nextLabel, 
+        label: nextLabel, // Hiển thị p1, p2
         tokens: 0,
         position,
       });
     } else if (selectedTool === 'transition') {
-      if (!addTransition || typeof addTransition !== 'function') {
-        console.error('addTransition is not a function');
-        return;
-      }
-      
-      const nextLabel = generateNextLabel('t', transitions || []);
+      // Tương tự cho transition: t1, t2...
+      const nextLabel = generateNextLabel('t', transitions);
       const id = nextLabel;
 
       addTransition({
@@ -264,50 +177,14 @@ const CanvasEditor = () => {
       });
     }
   }, [reactFlowInstance, selectedTool, addPlace, addTransition, setSelectedElement, places, transitions]);
+  // -------------------------------------------------------------
 
   const onNodeClick = useCallback((event, node) => {
-    console.log('onNodeClick:', { selectedTool, nodeType: node.type, nodeId: node.id, firstSelectedNode });
-    
     if (selectedTool === 'token' && node.type === 'place') {
       event.preventDefault(); 
       const currentTokens = node.data.tokens || 0;
       const newTokens = event.shiftKey ? Math.max(0, currentTokens - 1) : currentTokens + 1;
       updatePlace(node.id, { tokens: newTokens });
-    } else if (selectedTool === 'arc') {
-      event.preventDefault();
-      
-      if (!firstSelectedNode) {
-        console.log('Setting first selected node:', node);
-        setFirstSelectedNode(node);
-      } else {
-        console.log('Second click - checking types:', { firstType: firstSelectedNode.type, secondType: node.type });
-        
-        if (firstSelectedNode.type !== node.type) {
-          const sourceId = firstSelectedNode.id;
-          const targetId = node.id;
-          
-          console.log('Creating arc:', { sourceId, targetId });
-          
-          const existingArc = arcs.find(arc => 
-            (arc.source === sourceId && arc.target === targetId)
-          );
-          
-          if (!existingArc) {
-            console.log('Adding new arc');
-            addArc({
-              id: `a${Date.now()}`,
-              source: sourceId,
-              target: targetId,
-              weight: 1
-            });
-          } else {
-            console.log('Arc already exists');
-          }
-        } else {
-          console.log('Same type nodes - not creating arc');
-        }
-        setFirstSelectedNode(null);
-      }
     } else {
       setSelectedElement({
         type: node.type,
@@ -315,7 +192,7 @@ const CanvasEditor = () => {
         data: node.data,
       });
     }
-  }, [selectedTool, updatePlace, setSelectedElement, firstSelectedNode, arcs, addArc, setFirstSelectedNode]);
+  }, [selectedTool, updatePlace, setSelectedElement]);
 
   const onNodesDelete = useCallback(
     (nodesToDelete) => {
@@ -326,6 +203,7 @@ const CanvasEditor = () => {
           deleteTransition(node.id);
         }
       });
+      // Reset selection sau khi xóa
       setSelectedElement(null);
     },
     [deletePlace, deleteTransition, setSelectedElement]
@@ -342,7 +220,7 @@ const CanvasEditor = () => {
   );
 
   return (
-    <div className="flex-1 relative overflow-hidden" ref={reactFlowWrapper}>
+    <div className="flex-1 relative" ref={reactFlowWrapper}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -357,13 +235,12 @@ const CanvasEditor = () => {
         onInit={setReactFlowInstance}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        connectionLineType={ConnectionLineType.Straight }
+        connectionLineType={ConnectionLineType.SmoothStep}
         fitView
         snapToGrid
         minZoom={0.1}
         className="bg-canvas-bg"
-        style={{ width: '100%', height: '100%' }}
-        nodesConnectable={false}
+        nodesConnectable={selectedTool === 'select' || selectedTool === 'arc'}
         nodesDraggable={selectedTool === 'select'}
       >
         <Background color="#e2e8f0" gap={20} />
@@ -375,15 +252,8 @@ const CanvasEditor = () => {
       </ReactFlow>
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded shadow text-sm text-gray-600 border border-gray-200">
-        Mode: <strong>{selectedTool ? selectedTool.toUpperCase() : 'SELECT'}</strong>
+        Mode: <strong>{(selectedTool || 'select').toUpperCase()}</strong>
         {selectedTool === 'token' && <span className="ml-2 text-xs text-gray-500">(Click: +1, Shift+Click: -1)</span>}
-        {selectedTool === 'arc' && (
-          <span className="ml-2 text-xs text-blue-600">
-            {firstSelectedNode 
-              ? `Selected ${firstSelectedNode.type}: ${firstSelectedNode.data.label || firstSelectedNode.id}. Click another node to connect.`
-              : 'Click a place or transition to start connecting.'}
-          </span>
-        )}
       </div>
     </div>
   );

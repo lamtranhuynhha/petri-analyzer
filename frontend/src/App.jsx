@@ -111,21 +111,23 @@ const applyDagreLayout = (net, options = {}) => {
  * Main App Component - Assembly tất cả components và xử lý business logic
  */
 function App() {
+  const store = usePetriNetStore() || {};
+
   const {
-    resetNet,
-    loadPetriNet,
-    getPetriNetData,
-    getPetriNetDataGraphic,
-    setAnalysisResult,
-    setLoading,
-    updateStatus,
-    undo,
-    canUndo,
-    setSelectedTool,
-    places,
-    transitions,
-    setSelectedElement,
-  } = usePetriNetStore();
+    resetNet = () => {},
+    loadPetriNet = () => {},
+    getPetriNetData = () => ({ places: [], transitions: [], arcs: [], weights: {}, initial_marking: {} }),
+    getPetriNetDataGraphic = () => ({ places: [], transitions: [], arcs: [], weights: {}, initial_marking: {} }),
+    setAnalysisResult = () => {},
+    setLoading = () => {},
+    updateStatus = () => {},
+    undo = () => {},
+    canUndo = () => false,
+    setSelectedTool = () => {},
+    places = [],
+    transitions = [],
+    setSelectedElement = () => {},
+  } = store;
   
   // File operations
   const handleSave = useCallback(() => {
