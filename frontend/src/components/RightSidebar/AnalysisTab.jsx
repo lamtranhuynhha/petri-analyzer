@@ -29,7 +29,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* REACHABILITY SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">🔍 REACHABILITY</div>
+        <div className="font-semibold text-gray-800 mb-2">REACHABILITY</div>
         
         <div className="space-y-2">
           <button
@@ -76,7 +76,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* PROPERTIES SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">✓ PROPERTIES</div>
+        <div className="font-semibold text-gray-800 mb-2">PROPERTIES</div>
         
         <div className="space-y-2">
           {/* Boundedness */}
@@ -100,7 +100,7 @@ const AnalysisTab = ({ onAnalyze }) => {
                     ? 'text-green-600' 
                     : 'text-red-600'
                 }`}>
-                  {analysisResults.boundedness.is_bounded ? '✅ Bounded' : '⚠️ Unbounded'}
+                  {analysisResults.boundedness.is_bounded ? 'Bounded' : 'Unbounded'}
                 </span>
               </div>
               
@@ -168,7 +168,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* STRUCTURE SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">🔷 STRUCTURE</div>
+        <div className="font-semibold text-gray-800 mb-2">STRUCTURE</div>
         
         <button
           onClick={() => handleAnalyze('siphonsTraps')}
@@ -218,7 +218,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* LIVENESS SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">💚 LIVENESS</div>
+        <div className="font-semibold text-gray-800 mb-2">LIVENESS</div>
         
         <button
           onClick={() => handleAnalyze('liveness')}

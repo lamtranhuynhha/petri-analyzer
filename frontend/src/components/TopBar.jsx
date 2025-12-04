@@ -147,7 +147,7 @@ const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
       <div className="flex items-center gap-3 text-sm">
         <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded">
           <span className="font-medium text-gray-600">Net:</span>
-          {status.isBounded === null ? (
+          {status?.isBounded === undefined || status?.isBounded === null ? (
             <span className="text-gray-500">-</span>
           ) : status.isBounded ? (
             <span className="text-green-600 font-semibold">✅ BOUNDED</span>
@@ -159,7 +159,7 @@ const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
         <div className="flex items-center gap-2 px-3 py-1 bg-gray-100 rounded">
           <span className="font-medium text-gray-600">Elements:</span>
           <span className="text-gray-800">
-            {places.length}P, {transitions.length}T
+            {places?.length || 0}P, {transitions?.length || 0}T
           </span>
         </div>
         

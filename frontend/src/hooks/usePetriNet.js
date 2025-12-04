@@ -24,6 +24,7 @@ const usePetriNetStore = create((set, get) => ({
     coverabilityTree: false,
     export: false,
     confirm: false,
+    welcome: false, // Đảm bảo có cái này để không lỗi WelcomeModal
   },
   confirmAction: null,
   
@@ -92,7 +93,7 @@ const usePetriNetStore = create((set, get) => ({
         clearInterval(state.autoPlayInterval);
       }
       
-      get().saveToHistory();
+      // get().saveToHistory(); // Tạm tắt để tránh lỗi vòng lặp
       
       return {
         places: resetPlaces,
@@ -106,7 +107,7 @@ const usePetriNetStore = create((set, get) => ({
     }
     
     const newPlaces = [...state.places, place];
-    get().saveToHistory();
+    // get().saveToHistory();
     
     return {
       places: newPlaces,
@@ -167,7 +168,7 @@ const usePetriNetStore = create((set, get) => ({
     }
     get().resetSimulationIfModelChanged();
 
-    get().saveToHistory();
+    // get().saveToHistory();
     const newPlaces = state.places.filter(p => p.id !== id);
     const arcsToRemove = state.arcs.filter(a => a.source === id || a.target === id);
     const newArcs = state.arcs.filter(a => a.source !== id && a.target !== id);
@@ -205,7 +206,7 @@ const usePetriNetStore = create((set, get) => ({
     get().resetSimulationIfModelChanged();
 
     const newTransitions = [...state.transitions, transition];
-    get().saveToHistory();
+    // get().saveToHistory();
     return {
       transitions: newTransitions,
       status: { ...state.status, elementCount: { ...state.status.elementCount, transitions: newTransitions.length } }
@@ -234,7 +235,7 @@ const usePetriNetStore = create((set, get) => ({
     }
     get().resetSimulationIfModelChanged();
 
-    get().saveToHistory();
+    // get().saveToHistory();
     const newTransitions = state.transitions.filter(t => t.id !== id);
 
     const arcsToRemove = state.arcs.filter(a => a.source === id || a.target === id);
@@ -267,7 +268,7 @@ const usePetriNetStore = create((set, get) => ({
     const newArcs = [...state.arcs, arc];
     const weightKey = JSON.stringify([arc.source, arc.target]);
     const newWeights = { ...state.weights, [weightKey]: arc.weight || 1 };
-    get().saveToHistory();
+    // get().saveToHistory();
     return { arcs: newArcs, weights: newWeights };
   }),
 
@@ -306,7 +307,7 @@ const usePetriNetStore = create((set, get) => ({
     }
     get().resetSimulationIfModelChanged();
 
-    get().saveToHistory();
+    // get().saveToHistory();
     const arc = state.arcs.find(a => a.id === id);
     const newArcs = state.arcs.filter(a => a.id !== id);
     if (arc) {
@@ -403,8 +404,9 @@ const usePetriNetStore = create((set, get) => ({
 
   getEnabledTransitions: () => {
     const state = get();
-    return state.transitions.filter(t => {
-      const inputArcs = state.arcs.filter(a => a.target === t.id);
+    // FIX: Thêm bảo vệ state.transitions và arcs
+    return (state.transitions || []).filter(t => {
+      const inputArcs = (state.arcs || []).filter(a => a.target === t.id);
       return inputArcs.every(arc => {
         const weightKey = JSON.stringify([arc.source, arc.target]);
         const weight = state.weights[weightKey] || 1;
@@ -440,12 +442,21 @@ const usePetriNetStore = create((set, get) => ({
 
   // ============ ACTIONS - Analysis ============
 
-  setAnalysisResult: (analysisType, result) => set((state) => ({
-    analysisResults: {
-      ...state.analysisResults,
-      [analysisType]: result,
+setAnalysisResult: (analysisType, result) => set((state) => {
+    
+    // 1. Viết logic ở đây
+    if (analysisType === 'reachability') {
+        console.log("🎯 Reachability Data:", result);
     }
-  })),
+
+    // 2. Sau đó mới return object state
+    return {
+      analysisResults: {
+        ...state.analysisResults,
+        [analysisType]: result,
+      }
+    };
+  }),
 
   setLoading: (key, value) => set((state) => ({
     loading: { ...state.loading, [key]: value }
@@ -610,7 +621,7 @@ const usePetriNetStore = create((set, get) => ({
   },
 
   loadPetriNet: (data) => set((state) => {
-    get().saveToHistory();
+    // get().saveToHistory();
     return {
       places: data.places || [],
       transitions: data.transitions || [],
@@ -629,7 +640,7 @@ const usePetriNetStore = create((set, get) => ({
   }),
 
   resetNet: () => set((state) => {
-    get().saveToHistory();
+    // get().saveToHistory();
     return {
       places: [],
       transitions: [],
@@ -712,6 +723,7 @@ const usePetriNetStore = create((set, get) => ({
         autoPlayInterval: null,
       };
     }
+    return {}; // Trả về object rỗng nếu không có thay đổi để tránh lỗi
   }),
 
 })); 

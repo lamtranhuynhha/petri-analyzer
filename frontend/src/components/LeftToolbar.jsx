@@ -33,7 +33,7 @@ const LeftToolbar = () => {
           return (
             <button
               key={tool.id}
-              onClick={() => setSelectedTool(tool.id)}
+              onClick={() => usePetriNetStore.getState().setSelectedTool(tool.id)}
               className={`
                 w-14 h-14 rounded-lg flex items-center justify-center
                 transition-all duration-200

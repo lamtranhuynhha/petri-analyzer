@@ -52,8 +52,9 @@ const applyDagreLayout = (net, options = {}) => {
 
   // Tính bounding box để scale cho phù hợp với kích thước mong muốn
   const dagreNodes = [
-    ...places.map((p) => ({ id: p.id, n: g.node(p.id) })),
-    ...transitions.map((t) => ({ id: t.id, n: g.node(t.id) })),
+    ...(places || []).map((p) => ({ id: p.id, n: g.node(p.id) })),
+    
+    ...(transitions || []).map((t) => ({ id: t.id, n: g.node(t.id) })),
   ].filter(({ n }) => !!n);
 
   if (dagreNodes.length === 0) {
@@ -78,7 +79,7 @@ const applyDagreLayout = (net, options = {}) => {
 
   const scale = Math.min(targetWidth / rangeX, targetHeight / rangeY, 1); // không phóng to quá 1
 
-  const placedPlaces = places.map((p) => {
+  const placedPlaces = (places || []).map((p) => {
     const n = g.node(p.id);
     if (!n) return p;
     const x = (n.x - minX) * scale + marginX;
@@ -89,7 +90,7 @@ const applyDagreLayout = (net, options = {}) => {
     };
   });
 
-  const placedTransitions = transitions.map((t) => {
+  const placedTransitions = (transitions || []).map((t) => {
     const n = g.node(t.id);
     if (!n) return t;
     const x = (n.x - minX) * scale + marginX;
@@ -277,6 +278,7 @@ function App() {
       switch (type) {
         case 'reachability': {
           const result = await api.analyzeReachability(data);
+          console.log("Data: ",data);
 
           // Hỗ trợ cả hai dạng: { result: {...} } hoặc trả phẳng {...}
           const rgResult = result?.result || result;

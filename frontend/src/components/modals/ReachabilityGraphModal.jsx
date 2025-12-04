@@ -10,7 +10,7 @@ const ReachabilityGraphModal = () => {
   const [zoom, setZoom] = React.useState(100);
   const [showLegend, setShowLegend] = React.useState(true);
   
-  if (!modals.reachabilityGraph) return null;
+  if (!modals?.reachabilityGraph) return null;
   
   const rgData = analysisResults.reachability;
   

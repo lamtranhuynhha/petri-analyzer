@@ -17,7 +17,7 @@ const PlaceNode = ({ id, data, selected }) => {
   const { updatePlace, setSelectedElement, currentMarking, selectedTool, firstSelectedNode } = usePetriNetStore();
   
   // Lấy số token hiện tại (ưu tiên từ simulation marking)
-  const tokens = currentMarking[id] !== undefined ? currentMarking[id] : (data.tokens || 0);
+const tokens = (currentMarking && currentMarking[id] !== undefined) ? currentMarking[id] : (data.tokens || 0);
   
   // Kiểm tra nếu node đang được chọn để tạo arc
   const isArcSource = selectedTool === 'arc' && firstSelectedNode?.id === id;

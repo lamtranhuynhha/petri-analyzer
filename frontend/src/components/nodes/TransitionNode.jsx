@@ -10,11 +10,13 @@ const TransitionNode = ({ id, data, selected }) => {
   const { setSelectedElement, getEnabledTransitions, analysisResults, selectedTool, firstSelectedNode } = usePetriNetStore();
   
   // Kiểm tra transition có enabled không
-  const enabledTransitions = getEnabledTransitions();
+  const enabledTransitions = typeof getEnabledTransitions === 'function' 
+  ? getEnabledTransitions() 
+  : [];
   const isEnabled = enabledTransitions.some(t => t.id === id);
   
   // Lấy liveness level từ analysis results
-  const livenessLevel = analysisResults.liveness?.details?.[id] || null;
+  const livenessLevel = analysisResults?.liveness?.details?.[id] || null;
   
   // Kiểm tra nếu node đang được chọn để tạo arc
   const isArcSource = selectedTool === 'arc' && firstSelectedNode?.id === id;

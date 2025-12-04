@@ -71,23 +71,24 @@ class PetriNet:
         """
         # Lưu initial marking để có thể truy xuất sau
         self.initial_marking: Dict[str, int] = request.initial_marking.copy()
-        
         # Khởi tạo các place với số token ban đầu
         self.places: Dict[str, Place] = {}
         self.transitions: Set[str] = set(request.transitions)
         self.arcs: List[Arc] = []
-        
         # Tạo các place
         for place_name in request.places:
             tokens = request.initial_marking.get(place_name, 0)
             self.places[place_name] = Place(name=place_name, tokens=tokens)
         
         # Tạo các cung
-        arc_weights = {tuple(arc): weight for arc, weight in request.weights.items()}
-        
+        import json
+        arc_weights = {
+            tuple(json.loads(arc)): weight
+            for arc, weight in request.weights.items()
+        } # 04/12/2025
         for source, target in request.arcs:
             weight = arc_weights.get((source, target), 1)
-            
+    
             # Xác định hướng của cung
             if source in self.places and target in self.transitions:
                 direction = ArcDirection.IN

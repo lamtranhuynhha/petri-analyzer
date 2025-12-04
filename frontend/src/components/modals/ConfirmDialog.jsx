@@ -7,7 +7,7 @@ import usePetriNetStore from '../../hooks/usePetriNet';
 const ConfirmDialog = () => {
   const { modals, closeModal, confirmAction } = usePetriNetStore();
   
-  if (!modals.confirm || !confirmAction) return null;
+  if (!modals?.confirm || !confirmAction) return null;
   
   const handleConfirm = () => {
     if (confirmAction.onConfirm) {
