@@ -6,136 +6,97 @@ import xml.etree.ElementTree as ET
 from typing import Dict, List, Any
 
 
+import xml.etree.ElementTree as ET
+from typing import Dict, Any, List
+
 def parse_pnml(pnml_string: str) -> Dict[str, Any]:
     """
-    Parse PNML XML string thành JSON format chuẩn
+    Parse PNML XML string thành JSON format chuẩn.
     
-    Returns:
-        {
-            'places': [str],
-            'transitions': [str],
-            'arcs': [[str, str]],
-            'weights': {str: int},
-            'initial_marking': {str: int}
-        }
+    Trả về dict với keys:
+        - places: [{'id', 'label', 'position': {'x','y'}}]
+        - transitions: [{'id', 'label', 'position': {'x','y'}}]
+        - arcs: [[source_id, target_id]]
+        - weights: {"[source,target]": int}
+        - initial_marking: {place_id: int}
     """
     try:
+        # Parse XML
         root = ET.fromstring(pnml_string)
-        
-        # Find net element
-        net = root.find('.//{http://www.pnml.org/version-2009/grammar/pnml}net')
-        if net is None:
-            # Try without namespace
-            net = root.find('.//net')
+        ns = {'pnml': 'http://www.pnml.org/version-2009/grammar/pnml'}
+
+        # Net
+        net = root.find('pnml:net', ns)
         if net is None:
             raise ValueError("No <net> element found in PNML")
-        
-        # Find page element (optional)
-        page = net.find('.//{http://www.pnml.org/version-2009/grammar/pnml}page')
+
+        # Page (optional)
+        page = net.find('pnml:page', ns)
         if page is None:
-            page = net.find('.//page')
-        if page is None:
-            page = net  # Use net directly if no page
-        
+            page = net  # fallback
+
         places = []
         transitions = []
         arcs = []
         weights = {}
         initial_marking = {}
-        
-        # Parse places
-        for place in page.findall('.//{http://www.pnml.org/version-2009/grammar/pnml}place'):
-            place_id = place.get('id')
-            if not place_id:
+
+        # ----------- Places -----------
+        for place in page.findall('pnml:place', ns):
+            pid = place.get('id')
+            if not pid:
                 continue
-            
-            places.append(place_id)
-            
-            # Parse initial marking
-            marking_elem = place.find('.//{http://www.pnml.org/version-2009/grammar/pnml}initialMarking')
-            if marking_elem is None:
-                marking_elem = place.find('.//initialMarking')
-            
-            if marking_elem is not None:
-                text_elem = marking_elem.find('.//{http://www.pnml.org/version-2009/grammar/pnml}text')
-                if text_elem is None:
-                    text_elem = marking_elem.find('.//text')
-                
-                if text_elem is not None and text_elem.text:
-                    try:
-                        initial_marking[place_id] = int(text_elem.text)
-                    except ValueError:
-                        initial_marking[place_id] = 0
-            else:
-                initial_marking[place_id] = 0
-        
-        # Parse places without namespace (fallback)
-        if not places:
-            for place in page.findall('.//place'):
-                place_id = place.get('id')
-                if place_id:
-                    places.append(place_id)
-                    initial_marking[place_id] = 0
-                    
-                    marking_elem = place.find('.//initialMarking')
-                    if marking_elem is not None:
-                        text_elem = marking_elem.find('.//text')
-                        if text_elem is not None and text_elem.text:
-                            try:
-                                initial_marking[place_id] = int(text_elem.text)
-                            except ValueError:
-                                pass
-        
-        # Parse transitions
-        for trans in page.findall('.//{http://www.pnml.org/version-2009/grammar/pnml}transition'):
-            trans_id = trans.get('id')
-            if trans_id:
-                transitions.append(trans_id)
-        
-        if not transitions:
-            for trans in page.findall('.//transition'):
-                trans_id = trans.get('id')
-                if trans_id:
-                    transitions.append(trans_id)
-        
-        # Parse arcs
-        for arc in page.findall('.//{http://www.pnml.org/version-2009/grammar/pnml}arc'):
+
+            # Label
+            name_elem = place.find('pnml:name/pnml:text', ns)
+            label = name_elem.text if name_elem is not None else pid
+
+            # Position
+            pos_elem = place.find('pnml:graphics/pnml:position', ns)
+            x = int(pos_elem.get('x', 0)) if pos_elem is not None else 0
+            y = int(pos_elem.get('y', 0)) if pos_elem is not None else 0
+
+            places.append({'id': pid, 'label': label, 'position': {'x': x, 'y': y}})
+
+            # Initial marking
+            marking_elem = place.find('pnml:initialMarking/pnml:text', ns)
+            initial_marking[pid] = int(marking_elem.text) if marking_elem is not None and marking_elem.text else 0
+
+        # ----------- Transitions -----------
+        for t in page.findall('pnml:transition', ns):
+            tid = t.get('id')
+            if not tid:
+                continue
+
+            # Label
+            name_elem = t.find('pnml:name/pnml:text', ns)
+            label = name_elem.text if name_elem is not None else tid
+
+            # Position
+            pos_elem = t.find('pnml:graphics/pnml:position', ns)
+            x = int(pos_elem.get('x', 0)) if pos_elem is not None else 0
+            y = int(pos_elem.get('y', 0)) if pos_elem is not None else 0
+
+            transitions.append({'id': tid, 'label': label, 'position': {'x': x, 'y': y}})
+
+        # ----------- Arcs -----------
+        for arc in page.findall('pnml:arc', ns):
             source = arc.get('source')
             target = arc.get('target')
-            
-            if source and target:
-                arcs.append([source, target])
-                
-                # Parse weight (inscription)
-                weight_elem = arc.find('.//{http://www.pnml.org/version-2009/grammar/pnml}inscription')
-                if weight_elem is None:
-                    weight_elem = arc.find('.//inscription')
-                
-                weight = 1
-                if weight_elem is not None:
-                    text_elem = weight_elem.find('.//{http://www.pnml.org/version-2009/grammar/pnml}text')
-                    if text_elem is None:
-                        text_elem = weight_elem.find('.//text')
-                    
-                    if text_elem is not None and text_elem.text:
-                        try:
-                            weight = int(text_elem.text)
-                        except ValueError:
-                            weight = 1
-                
-                weight_key = f'["{source}","{target}"]'
-                weights[weight_key] = weight
-        
-        if not arcs:
-            for arc in page.findall('.//arc'):
-                source = arc.get('source')
-                target = arc.get('target')
-                
-                if source and target:
-                    arcs.append([source, target])
-                    weight_key = f'["{source}","{target}"]'
-                    weights[weight_key] = 1
-        
+            if not source or not target:
+                continue
+
+            arcs.append({
+                'source': source,
+                'target': target
+            })
+
+            # Weight
+            weight_elem = arc.find('pnml:inscription/pnml:text', ns)
+            weight = int(weight_elem.text) if weight_elem is not None and weight_elem.text else 1
+            key = f'["{source}","{target}"]'
+            weights[key] = weight
+
         return {
             'places': places,
             'transitions': transitions,
@@ -143,53 +104,64 @@ def parse_pnml(pnml_string: str) -> Dict[str, Any]:
             'weights': weights,
             'initial_marking': initial_marking
         }
-    
+
     except ET.ParseError as e:
         raise ValueError(f"Invalid PNML XML: {str(e)}")
     except Exception as e:
         raise ValueError(f"Error parsing PNML: {str(e)}")
 
 
-def generate_pnml(net_data: Dict[str, Any]) -> str:
-    """
-    Generate PNML XML string từ JSON format
-    """
+
+def generate_pnml(data: Dict[str, Any]) -> str:
+    ns = ""
+    ET.register_namespace("", ns)
+
     pnml = ET.Element('pnml', xmlns="http://www.pnml.org/version-2009/grammar/pnml")
-    net = ET.SubElement(pnml, 'net', id="net1", type="http://www.pnml.org/version-2009/grammar/ptnet")
-    page = ET.SubElement(net, 'page', id="page1")
-    
-    # Add places
-    for place_id in net_data.get('places', []):
-        place_elem = ET.SubElement(page, 'place', id=place_id)
-        
-        # Add initial marking
-        tokens = net_data.get('initial_marking', {}).get(place_id, 0)
-        if tokens > 0:
-            marking = ET.SubElement(place_elem, 'initialMarking')
-            text = ET.SubElement(marking, 'text')
-            text.text = str(tokens)
-    
-    # Add transitions
-    for trans_id in net_data.get('transitions', []):
-        ET.SubElement(page, 'transition', id=trans_id)
-    
-    # Add arcs
-    arc_id = 1
-    for arc in net_data.get('arcs', []):
-        source, target = arc
-        arc_elem = ET.SubElement(page, 'arc', id=f"arc{arc_id}", source=source, target=target)
-        
-        # Add weight
-        weight_key = f'["{source}","{target}"]'
-        weight = net_data.get('weights', {}).get(weight_key, 1)
-        
-        if weight > 1:
-            inscription = ET.SubElement(arc_elem, 'inscription')
-            text = ET.SubElement(inscription, 'text')
-            text.text = str(weight)
-        
-        arc_id += 1
-    
-    # Convert to string with pretty formatting
+    net = ET.SubElement(pnml, 'net', id="net", type="http://www.pnml.org/version-2009/grammar/ptnet")
+    page = ET.SubElement(net, 'page', id="page")
+
+    # Places
+    for p in data.get("places", []):
+        place = ET.SubElement(page, "place", id=p.get("id"))
+        graphics = ET.SubElement(place, "graphics")
+        pos = ET.SubElement(graphics, "position", {
+            "x": str(p.get("position", {}).get("x", 0)),
+            "y": str(p.get("position", {}).get("y", 0))
+        })
+
+        name = ET.SubElement(place,"name")
+        ntext = ET.SubElement(name,"text")
+        ntext.text = p.get("label", p.get("id"))
+
+        marking = ET.SubElement(place, "initialMarking")
+        mtext = ET.SubElement(marking, "text")
+        mtext.text = str(data.get("initial_marking", {}).get(p.get("id"), 0))
+
+    # Transitions
+    for t in data.get("transitions", []):
+        trans = ET.SubElement(page, "transition", id=t.get("id"))
+        graphics = ET.SubElement(trans, "graphics")
+        pos = ET.SubElement(graphics, "position", {
+            "x": str(t.get("position", {}).get("x", 0)),
+            "y": str(t.get("position", {}).get("y", 0))
+        })
+        name = ET.SubElement(trans,"name")
+        ntext = ET.SubElement(name,"text")
+        ntext.text = t.get("label", t.get("id"))
+
+    # Arcs
+    for arc_info in data.get("arcs", []):
+        arc = ET.SubElement(page, "arc", {
+            "id": f"{arc_info['source']}_{arc_info['target']}",
+            "source": arc_info["source"],
+            "target": arc_info["target"]
+        })
+        ins = ET.SubElement(arc, "inscription")
+        itext = ET.SubElement(ins, "text")
+        # weights = data.get("wrights")
+        itext.text = str(arc_info.get("weight", 1))
+
     ET.indent(pnml, space="  ")
     return ET.tostring(pnml, encoding='unicode', xml_declaration=True)
+
+

@@ -86,7 +86,7 @@ export const exportPetriNet = async (netData, format) => {
     net_data: netData,
     format,
   }, {
-    responseType: format === 'png' || format === 'svg' ? 'blob' : 'json',
+    responseType: format == 'pnml' || format === 'png' || format === 'svg' ? 'blob' : 'json',
   });
 };
 
@@ -148,7 +148,7 @@ export const analyzeSiphonsTraps = async (netData) => {
  */
 export const getReachabilityGraphImage = async (rgData, format = 'svg') => {
   return await apiClient.post(`/visualize/reachability`, {
-    rg_data: rgData,
+    data: rgData,
     format,
   }, {
     responseType: 'blob',

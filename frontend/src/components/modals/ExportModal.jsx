@@ -10,7 +10,7 @@ const ExportModal = ({ onExport }) => {
   const [selectedFormat, setSelectedFormat] = React.useState('json');
   const [includeAnalysis, setIncludeAnalysis] = React.useState(false);
   
-  if (!modals.export) return null;
+  if (!modals?.export) return null;
   
   const formats = [
     { id: 'json', label: 'JSON', icon: '📄', desc: 'JavaScript Object Notation' },

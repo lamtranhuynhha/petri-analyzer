@@ -6,7 +6,7 @@ const WelcomeModal = () => {
   const { modals, closeModal } = usePetriNetStore();
   
   // Kiểm tra trạng thái modal 'welcome'
-  if (!modals.welcome) return null;
+  if (!modals?.welcome) return null;
   
   return (
     <div className="modal-backdrop" onClick={() => closeModal('welcome')}>
