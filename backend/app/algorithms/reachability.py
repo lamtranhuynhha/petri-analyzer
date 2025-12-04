@@ -208,19 +208,16 @@ def analyze_reachability(
                 'to': target_idx,
                 'transition': transition_name
             })
-    
-    # Tạo ảnh đồ thị (nếu cần)
-    # graph_image = reachability_to_dot(rg)  # Có thể thêm sau
-    print(
-        ReachabilityResult(
-        states=states,
-        edges=edges,
-        graph_image=None  # Sẽ thêm logic tạo ảnh sau
-    )
 
-    )
+    # Chuyển deadlocks sang dạng list[dict] để trả về API
+    deadlock_markings: List[Dict[str, int]] = []
+    for dl_tuple in rg["deadlocks"]:
+        marking_dict = {place_names[i]: dl_tuple[i] for i in range(len(place_names))}
+        deadlock_markings.append(marking_dict)
+
     return ReachabilityResult(
         states=states,
         edges=edges,
-        graph_image=None  # Sẽ thêm logic tạo ảnh sau
+        deadlocks=deadlock_markings,
+        graph_image=None  # backend chưa gán ảnh trực tiếp, frontend sẽ gọi visualize
     )

@@ -24,6 +24,7 @@ class ReachabilityResult(BaseModel):
     """
     states: List[Dict[str, int]] = Field(..., description="Danh sách các marking (trạng thái)")
     edges: List[Dict[str, Any]] = Field(..., description="Danh sách các cạnh đồ thị")
+    deadlocks: List[Dict[str, int]] = Field(default_factory=list, description="Danh sách các marking deadlock trong RG")
     graph_image: Optional[str] = Field(None, description="Ảnh đồ thị dạng base64")
 
 
