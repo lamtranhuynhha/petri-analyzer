@@ -255,29 +255,96 @@ const AnalysisTab = ({ onAnalyze }) => {
                 Check Liveness
               </button>
               
-              {analysisResults.liveness && (
-                <div className="bg-gray-50 p-3 rounded border border-gray-200">
-                   <div className="flex items-center gap-2 mb-2 pb-2 border-b border-gray-200">
-                      <span className={`font-bold text-base ${analysisResults.liveness.is_live ? 'text-green-600' : 'text-orange-600'}`}>
-                        {analysisResults.liveness.is_live ? 'Live Net' : 'Not Live'}
-                      </span>
-                      <span className="text-sm text-gray-500">(Level {analysisResults.liveness.liveness_level})</span>
-                   </div>
-                   
-                   {analysisResults.liveness.unreachable_transitions?.length > 0 ? (
-                     <div>
-                       <div className="text-sm font-semibold text-gray-600 mb-1">Dead Transitions:</div>
-                       <div className="flex flex-wrap gap-1">
-                         {analysisResults.liveness.unreachable_transitions.map(t => (
-                           <span key={t} className="text-sm bg-gray-200 text-gray-700 px-2 py-0.5 rounded">{t}</span>
-                         ))}
-                       </div>
-                     </div>
-                   ) : (
-                     <div className="text-sm text-green-600">All transitions are reachable.</div>
-                   )}
-                </div>
-              )}
+                {analysisResults.liveness && (
+                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm space-y-4">
+
+                      {/* --- Tổng quan Live Net --- */}
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-gray-200 pb-2">
+                        <span className={`font-bold text-lg sm:text-xl ${analysisResults.liveness.is_live ? 'text-green-600' : 'text-orange-600'}`}>
+                          {analysisResults.liveness.is_live ? 'Live' : 'Not Live'}
+                        </span>
+                        {!analysisResults.liveness.is_live && (
+                          <span className="text-sm text-gray-500">
+                            Liveness Level: <span className="font-bold">{analysisResults.liveness.liveness_level}</span>
+                          </span>
+                        )}
+                      </div>
+
+
+                      {/* --- Dead / Unreachable Transitions --- */}
+                      {analysisResults.liveness.unreachable_transitions?.length > 0 && (
+                        <div>
+                          <div className="text-sm font-semibold text-gray-600 mb-1">Dead / Unreachable Transitions:</div>
+                          <div className="flex flex-wrap gap-2">
+                            {analysisResults.liveness.unreachable_transitions.map(t => (
+                              <span key={t} className="text-sm bg-red-50 text-red-700 px-3 py-1 rounded-full font-medium">{t}</span>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+
+                      {/* --- Legend màu nhẹ --- */}
+                      <div className="flex flex-wrap gap-2 text-sm items-center">
+                        <span className="px-2 py-1 rounded-full bg-red-100 text-red-700 font-medium">Dead</span>
+                        <span className="px-2 py-1 rounded-full bg-orange-100 text-orange-700 font-medium">L1</span>
+                        <span className="px-2 py-1 rounded-full bg-yellow-100 text-yellow-800 font-medium">L2</span>
+                        <span className="px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">L3</span>
+                        <span className="px-2 py-1 rounded-full bg-green-100 text-green-700 font-medium">L4</span>
+                      </div>
+
+                      {/* --- Bảng liveness từng transition --- */}
+                      {analysisResults.liveness.transition_liveness_levels && (
+                        <div className="overflow-x-auto">
+                          <table className="table-auto w-full border border-gray-200 rounded-lg overflow-hidden text-sm">
+                            <thead className="bg-gray-50">
+                              <tr>
+                                <th className="px-2 py-1 border-b border-gray-200 text-center">ID</th>
+                                <th className="px-2 py-1 border-b border-gray-200 text-center">Label</th>
+                                <th className="px-2 py-1 border-b border-gray-200 text-center whitespace-nowrap">Levels of Liveness </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {Object.entries(analysisResults.liveness.transition_liveness_levels).sort().map(([id, level]) => {
+                                const transition = transitions.find(t => t.id === id);
+                                const labelText = transition?.label || id;
+
+                                let label = '';
+                                let bgColor = '';
+                                let textColor = '';
+                                switch(level) {
+                                  case 0: label = 'Dead'; bgColor = 'bg-red-400'; textColor = 'text-white'; break;
+                                  case 1: label = 'L1'; bgColor = 'bg-orange-200'; textColor = 'text-orange-800'; break;
+                                  case 2: label = 'L2'; bgColor = 'bg-yellow-200'; textColor = 'text-yellow-800'; break;
+                                  case 3: label = 'L3'; bgColor = 'bg-blue-200'; textColor = 'text-blue-800'; break;
+                                  case 4: label = 'L4'; bgColor = 'bg-green-200'; textColor = 'text-green-800'; break;
+                                  default: label = level; bgColor = 'bg-gray-200'; textColor = 'text-gray-600';
+                                }
+
+                                return (
+                                  <tr key={id} className="even:bg-gray-50">
+                                    <td className="px-2 py-1 border-b border-gray-200 text-center">{id}</td>
+                                    <td className="px-2 py-1 border-b border-gray-200 text-center">{labelText}</td>
+                                    <td className="px-2 py-1 border-b border-gray-200 text-center">
+                                      <span className={`inline-block px-2 py-0.5 text-xs rounded-full ${bgColor} ${textColor} font-semibold`}>
+                                        {label}
+                                      </span>
+                                    </td>
+                                  </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+
+
+
+
+                        </div>
+                      )}
+
+                    </div>
+                  )}
+
+
             </div>
 
           </div>
