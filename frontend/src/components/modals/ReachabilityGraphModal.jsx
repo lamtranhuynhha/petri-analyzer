@@ -76,7 +76,7 @@ const ReachabilityGraphModal = () => {
           
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
+<input
                 type="checkbox"
                 checked={showLegend}
                 onChange={(e) => setShowLegend(e.target.checked)}
@@ -153,7 +153,7 @@ const ReachabilityGraphModal = () => {
             </div>
             {rgData.max_tokens && (
               <div>
-                <span className="text-gray-600">Max tokens:</span>{' '}
+<span className="text-gray-600">Max tokens:</span>{' '}
                 <span className="font-semibold">{rgData.max_tokens}</span>
               </div>
             )}
@@ -175,5 +175,3 @@ const ReachabilityGraphModal = () => {
 };
 
 export default ReachabilityGraphModal;
-
-
