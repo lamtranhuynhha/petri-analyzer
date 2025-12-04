@@ -48,6 +48,8 @@ class BoundednessLivenessResult(BaseModel):
     is_live: bool = Field(..., description="Petri Net có đảm bảo liveness không")
     liveness_level: int = Field(..., description="Mức độ liveness (0-4): 0=dead, 1=L1-live, 2=L2-live, 3=L3-live, 4=L4-live")
     unreachable_transitions: List[str] = Field(..., description="Danh sách transition không bao giờ firing được")
+    transition_liveness_levels: Dict[str, int] = Field(..., description="Mức liveness của từng transition, 0=Dead, 1=L1, 2=L2, 3=L3, 4=L4")
+
 
 
 class SiphonTrapResult(BaseModel):
