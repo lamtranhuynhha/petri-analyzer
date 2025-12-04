@@ -193,7 +193,13 @@ def analyze_reachability(
     
     # Tạo mapping từ marking tuple -> index
     node_to_index: Dict[Tuple[int, ...], int] = {}
-    for idx, marking_tuple in enumerate(rg["nodes"]):
+
+    node_to_index[initial_tuple] = 0
+    markings.append({place_names[i]: initial_tuple[i] for i in range(len(place_names))})
+
+    other_nodes = rg["nodes"] - {initial_tuple}
+
+    for idx, marking_tuple in enumerate(other_nodes, start=1):
         node_to_index[marking_tuple] = idx
         # Chuyển tuple thành dict
         marking_dict = {place_names[i]: marking_tuple[i] for i in range(len(place_names))}
