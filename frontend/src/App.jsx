@@ -131,7 +131,7 @@ function App() {
   // File operations
   const handleSave = useCallback(() => {
     try {
-      const data = getPetriNetData();
+      const data = getPetriNetDataGraphic();
       const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -253,8 +253,37 @@ function App() {
         URL.revokeObjectURL(url);
         toast.success(`Đã export ${format}`);
       } else if (format === 'rg') {
-        // Export reachability graph
-        toast.info('Chức năng export RG đang được phát triển');
+        const { analysisResults } = usePetriNetStore.getState();
+        const rgData = analysisResults.reachability;
+
+        if (!rgData) {
+          toast.error('Chưa có Reachability Graph. Vui lòng chạy phân tích trước.');
+          return;
+        }
+
+        if (!rgData.graph_image) {
+          toast.error('Reachability Graph chưa có hình ảnh. Vui lòng thử lại.');
+          return;
+        }
+        const url = rgData.graph_image;
+
+        fetch(url)
+          .then((res) => res.blob())
+          .then((blob) => {
+            const downloadUrl = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = downloadUrl;
+            a.download = `reachability-graph-${Date.now()}.svg`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(downloadUrl);
+            toast.success('Tải Reachability Graph về máy thành công!');
+          })
+          .catch((err) => {
+            console.error('Lỗi khi tải RG:', err);
+            alert('Tải Reachability Graph thất bại.');
+          });
       }
     } catch (error) {
       console.error('Error exporting:', error);
@@ -303,14 +332,14 @@ function App() {
               const url = URL.createObjectURL(blob);
               rgResult.graph_image = url; // gán URL tạm thời để modal hiển thị
               // Mở tab mới xem đồ thị
-              window.open(url, '_blank');
+              // window.open(url, '_blank');
             } catch (imgErr) {
               console.error('Lỗi khi lấy ảnh RG:', imgErr);
               // Không có ảnh thì không mở tab, chỉ lưu kết quả
             }
           } else {
             // Nếu backend đã trả URL ảnh, mở tab mới
-            window.open(rgResult.graph_image, '_blank');
+            // window.open(rgResult.graph_image, '_blank');
           }
 
           setAnalysisResult('reachability', rgResult);
@@ -338,7 +367,7 @@ function App() {
             isBounded: result?.is_bounded,
           });
           toast.success(
-            result.result?.is_bounded
+            result?.is_bounded
               ? 'Net is BOUNDED'
               : 'Net is UNBOUNDED'
           );
@@ -356,8 +385,8 @@ function App() {
           const result = await api.analyzeSiphonsTraps(data);
           setAnalysisResult('siphonsTraps', result);
           toast.success(
-            `Tìm thấy ${result.result?.minimal_siphons?.length || 0} siphons, ` +
-            `${result.result?.minimal_traps?.length || 0} traps`
+            `Tìm thấy ${result?.minimal_siphons?.length || 0} siphons, ` +
+            `${result?.minimal_traps?.length || 0} traps`
           );
           break;
         }
