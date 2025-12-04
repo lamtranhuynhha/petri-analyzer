@@ -211,14 +211,8 @@ def analyze_reachability(
     
     # Tạo ảnh đồ thị (nếu cần)
     # graph_image = reachability_to_dot(rg)  # Có thể thêm sau
-    print(
-        ReachabilityResult(
-        states=states,
-        edges=edges,
-        graph_image=None  # Sẽ thêm logic tạo ảnh sau
-    )
+  
 
-    )
     return ReachabilityResult(
         states=states,
         edges=edges,

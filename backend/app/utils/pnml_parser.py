@@ -135,7 +135,7 @@ def generate_pnml(data: Dict[str, Any]) -> str:
 
         marking = ET.SubElement(place, "initialMarking")
         mtext = ET.SubElement(marking, "text")
-        mtext.text = str(data.get("marking", {}).get(p.get("id"), 0))
+        mtext.text = str(data.get("initial_marking", {}).get(p.get("id"), 0))
 
     # Transitions
     for t in data.get("transitions", []):
@@ -158,6 +158,7 @@ def generate_pnml(data: Dict[str, Any]) -> str:
         })
         ins = ET.SubElement(arc, "inscription")
         itext = ET.SubElement(ins, "text")
+        # weights = data.get("wrights")
         itext.text = str(arc_info.get("weight", 1))
 
     ET.indent(pnml, space="  ")

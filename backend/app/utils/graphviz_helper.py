@@ -28,7 +28,7 @@ def generate_rg_dot(
     
     # --- GLOBAL SETTINGS ---
     # rankdir=LR: Vẽ từ Trái sang Phải
-    lines.append("  rankdir=LR;") 
+    lines.append("  rankdir=TB;") 
     lines.append("  nodesep=0.5; ranksep=1.0;")
     lines.append("  splines=true;") 
     
