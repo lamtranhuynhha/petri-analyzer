@@ -7,22 +7,22 @@ import usePetriNetStore from '../../hooks/usePetriNet';
  */
 const SimulationTab = () => {
   const {
-    currentMarking = {},
-    initialMarking = {},
-    simulationHistory = [],
+    currentMarking,
+    initialMarking,
+    simulationHistory,
     isSimulating,
     resetToInitialMarking,
     fireTransition,
     getEnabledTransitions,
     startAutoPlay,
     stopAutoPlay,
-    places = [],
+    places,
     exportTrace,
   } = usePetriNetStore();
   
   const [autoPlaySpeed, setAutoPlaySpeed] = React.useState(1000);
   
-  const enabledTransitions = getEnabledTransitions() || [];
+  const enabledTransitions = getEnabledTransitions();
   
   const handleFire = (transitionId) => {
     fireTransition(transitionId);

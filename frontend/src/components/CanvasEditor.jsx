@@ -68,20 +68,16 @@ const CanvasEditor = () => {
     arc: ArcEdge,
   }), []);
 
-  // Sync Store -> React Flow (robust với dữ liệu undefined)
+  // Sync Store -> React Flow
   useEffect(() => {
-    const safePlaces = Array.isArray(places) ? places : [];
-    const safeTransitions = Array.isArray(transitions) ? transitions : [];
-    const safeArcs = Array.isArray(arcs) ? arcs : [];
-
     const newNodes = [
-      ...safePlaces.map((p) => ({
+      ...places.map((p) => ({
         id: p.id,
         type: 'place',
         position: p.position || { x: 0, y: 0 },
         data: { label: p.label, tokens: p.tokens },
       })),
-      ...safeTransitions.map((t) => ({
+      ...transitions.map((t) => ({
         id: t.id,
         type: 'transition',
         position: t.position || { x: 0, y: 0 },
@@ -89,15 +85,23 @@ const CanvasEditor = () => {
       })),
     ];
 
-    setNodes(newNodes);
+    if (JSON.stringify(newNodes.map(n => n.id)) !== JSON.stringify(nodes.map(n => n.id))) {
+       setNodes(newNodes);
+    } else {
+       setNodes((nds) => nds.map(node => {
+         const source = newNodes.find(n => n.id === node.id);
+         if (source) return { ...node, data: source.data };
+         return node;
+       }));
+    }
 
-    const newEdges = safeArcs.map((arc) => ({
+    const newEdges = arcs.map((arc) => ({
       id: arc.id,
       source: arc.source,
       target: arc.target,
       type: 'arc',
       markerEnd: { type: MarkerType.ArrowClosed, width: 20, height: 20 },
-      data: { weight: arc.weight, source: arc.source, target: arc.target },
+      data: { weight: arc.weight },
     }));
     
     setEdges(newEdges);
@@ -252,7 +256,7 @@ const CanvasEditor = () => {
       </ReactFlow>
 
       <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 backdrop-blur px-4 py-2 rounded shadow text-sm text-gray-600 border border-gray-200">
-        Mode: <strong>{(selectedTool || 'select').toUpperCase()}</strong>
+        Mode: <strong>{selectedTool.toUpperCase()}</strong>
         {selectedTool === 'token' && <span className="ml-2 text-xs text-gray-500">(Click: +1, Shift+Click: -1)</span>}
       </div>
     </div>

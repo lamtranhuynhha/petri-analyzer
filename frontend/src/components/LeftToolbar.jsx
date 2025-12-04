@@ -13,11 +13,6 @@ const LeftToolbar = () => {
     openModal
   } = usePetriNetStore();
   
-  if (!setSelectedTool || !openModal) {
-    console.error('LeftToolbar: Missing required functions from store');
-    return null;
-  }
-  
   const tools = [
     { id: 'select', icon: FaMousePointer, label: 'Select (S)', shortcut: 'S' },
     { id: 'place', icon: FaCircle, label: 'Place (P)', shortcut: 'P' },

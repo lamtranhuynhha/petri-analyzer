@@ -7,15 +7,14 @@ import usePetriNetStore from '../../hooks/usePetriNet';
  * Hiển thị hình chữ nhật với color coding theo liveness level
  */
 const TransitionNode = ({ id, data, selected }) => {
-  const { setSelectedElement, getEnabledTransitions, analysisResults = {} } = usePetriNetStore();
+  const { setSelectedElement, getEnabledTransitions, analysisResults } = usePetriNetStore();
   
-  // Kiểm tra transition có enabled không - với null safety
-  const enabledTransitions =
-    typeof getEnabledTransitions === 'function' ? getEnabledTransitions() || [] : [];
-  const isEnabled = Array.isArray(enabledTransitions) && enabledTransitions.some((t) => t && t.id === id);
+  // Kiểm tra transition có enabled không
+  const enabledTransitions = getEnabledTransitions();
+  const isEnabled = enabledTransitions.some(t => t.id === id);
   
   // Lấy liveness level từ analysis results
-  const livenessLevel = analysisResults?.liveness?.details?.[id] || null;
+  const livenessLevel = analysisResults.liveness?.details?.[id] || null;
   
   const handleClick = () => {
     setSelectedElement({
@@ -36,10 +35,10 @@ const TransitionNode = ({ id, data, selected }) => {
     return isEnabled ? '#10b981' : '#1e293b';
   };
   
-  // const getStatusIndicator = () => {
-  //   if (isEnabled) return '✓';
-  //   return '';
-  // };
+  const getStatusIndicator = () => {
+    if (isEnabled) return '✓';
+    return '';
+  };
   
   return (
     <div

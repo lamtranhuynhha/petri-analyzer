@@ -7,13 +7,10 @@ import usePetriNetStore from '../../hooks/usePetriNet';
  * Hiển thị hình tròn với token count và label
  */
 const PlaceNode = ({ id, data, selected }) => {
-  const { setSelectedElement, currentMarking = {} } = usePetriNetStore();
+  const { updatePlace, setSelectedElement, currentMarking } = usePetriNetStore();
   
-  // Lấy số token hiện tại (ưu tiên từ simulation marking) - với null safety
-  const tokens =
-    currentMarking && Object.prototype.hasOwnProperty.call(currentMarking, id)
-      ? currentMarking[id]
-      : (data && data.tokens) || 0;
+  // Lấy số token hiện tại (ưu tiên từ simulation marking)
+  const tokens = currentMarking[id] !== undefined ? currentMarking[id] : (data.tokens || 0);
   
   const handleClick = () => {
     setSelectedElement({

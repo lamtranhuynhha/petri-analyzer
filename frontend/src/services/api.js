@@ -148,7 +148,7 @@ export const analyzeSiphonsTraps = async (netData) => {
  */
 export const getReachabilityGraphImage = async (rgData, format = 'svg') => {
   return await apiClient.post(`/visualize/reachability`, {
-    data: rgData,
+    rg_data: rgData,
     format,
   }, {
     responseType: 'blob',
@@ -225,7 +225,7 @@ export const healthCheck = async () => {
   return await apiClient.get('/health');
 };
 
-const api = {
+export default {
   uploadPetriNet,
   convertFormat,
   exportPetriNet,
@@ -241,7 +241,5 @@ const api = {
   fireTransition,
   healthCheck,
 };
-
-export default api;
 
 

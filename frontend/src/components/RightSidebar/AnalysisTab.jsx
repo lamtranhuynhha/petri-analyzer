@@ -7,11 +7,11 @@ import usePetriNetStore from '../../hooks/usePetriNet';
  */
 const AnalysisTab = ({ onAnalyze }) => {
   const {
-    loading = {},
-    analysisResults = {},
+    loading,
+    analysisResults,
     openModal,
-    places = [],
-    transitions = [],
+    places,
+    transitions,
   } = usePetriNetStore();
   
   const hasNet = places.length > 0 || transitions.length > 0;
@@ -29,15 +29,15 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* REACHABILITY SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">REACHABILITY</div>
+        <div className="font-semibold text-gray-800 mb-2">🔍 REACHABILITY</div>
         
         <div className="space-y-2">
           <button
             onClick={() => handleAnalyze('reachability')}
-            disabled={loading?.reachability}
+            disabled={loading.reachability}
             className="w-full btn-primary btn-sm flex items-center justify-center gap-2"
           >
-            {loading?.reachability ? (
+            {loading.reachability ? (
               <>
                 <FaSpinner className="animate-spin" />
                 Building...
@@ -47,7 +47,7 @@ const AnalysisTab = ({ onAnalyze }) => {
             )}
           </button>
           
-          {analysisResults?.reachability && (
+          {analysisResults.reachability && (
             <>
               <button
                 onClick={() => openModal('reachabilityGraph')}
@@ -59,10 +59,10 @@ const AnalysisTab = ({ onAnalyze }) => {
               
               <div className="text-sm bg-gray-50 p-2 rounded">
                 <div className="flex justify-between mb-1">
-                  {/* <span className="text-gray-600">States:</span>
-                  <span className="font-semibold">{analysisResults.reachability.total_states || 0}</span> */}
+                  <span className="text-gray-600">States:</span>
+                  <span className="font-semibold">{analysisResults.reachability.total_states || 0}</span>
                 </div>
-                {analysisResults?.reachability?.truncated && (
+                {analysisResults.reachability.truncated && (
                   <div className="text-yellow-600 text-xs mt-1 flex items-center gap-1">
                     <FaExclamationTriangle />
                     Large space (truncated)
@@ -76,7 +76,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* PROPERTIES SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">PROPERTIES</div>
+        <div className="font-semibold text-gray-800 mb-2">✓ PROPERTIES</div>
         
         <div className="space-y-2">
           {/* Boundedness */}
@@ -100,7 +100,7 @@ const AnalysisTab = ({ onAnalyze }) => {
                     ? 'text-green-600' 
                     : 'text-red-600'
                 }`}>
-                  {analysisResults.boundedness.is_bounded ? 'Bounded' : 'Unbounded'}
+                  {analysisResults.boundedness.is_bounded ? '✅ Bounded' : '⚠️ Unbounded'}
                 </span>
               </div>
               
@@ -168,7 +168,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* STRUCTURE SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">STRUCTURE</div>
+        <div className="font-semibold text-gray-800 mb-2">🔷 STRUCTURE</div>
         
         <button
           onClick={() => handleAnalyze('siphonsTraps')}
@@ -218,7 +218,7 @@ const AnalysisTab = ({ onAnalyze }) => {
       
       {/* LIVENESS SECTION */}
       <div className="card p-3">
-        <div className="font-semibold text-gray-800 mb-2">LIVENESS</div>
+        <div className="font-semibold text-gray-800 mb-2">💚 LIVENESS</div>
         
         <button
           onClick={() => handleAnalyze('liveness')}

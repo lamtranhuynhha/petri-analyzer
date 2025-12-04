@@ -8,12 +8,7 @@ import SimulationTab from './SimulationTab';
  * Right Sidebar Component - Container cho 3 tabs
  */
 const RightSidebar = ({ onAnalyze }) => {
-  const { activeTab = 'properties', setActiveTab } = usePetriNetStore();
-  
-  if (!setActiveTab) {
-    console.error('RightSidebar: Missing setActiveTab function from store');
-    return null;
-  }
+  const { activeTab, setActiveTab } = usePetriNetStore();
   
   const tabs = [
     { id: 'properties', label: 'Properties', component: PropertiesTab },
