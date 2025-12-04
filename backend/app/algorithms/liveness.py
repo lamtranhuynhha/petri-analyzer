@@ -57,7 +57,7 @@ class SCCFinder:
 def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -> Dict[str, Any]:
     """
     Xây dựng reachability graph nội bộ cho thuật toán liveness.
-    Format tương tự petri_netV2.py để tương thích với code SCC.
+    Throw lỗi nếu số lượng trạng thái vượt quá max_states.
     """
     visited: Set[Tuple[Tuple[str, int], ...]] = set()
     edges: Dict[Tuple, List[Tuple[str, Tuple]]] = {}
@@ -69,8 +69,14 @@ def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -
     queue.append(initial_marking)
     visited.add(initial_tuple)
     nodes = {initial_tuple}
-    
-    while queue and len(nodes) < max_states:
+
+    while queue:
+        if len(nodes) >= max_states:
+            raise Exception(
+                f"Reachability graph vượt quá max_states={max_states}. "
+                f"Đồ thị có thể là vô hạn hoặc quá lớn."
+            )
+
         current_marking = queue.popleft()
         current_tuple = tuple(sorted(current_marking.items()))
         

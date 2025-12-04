@@ -150,16 +150,28 @@ def generate_pnml(data: Dict[str, Any]) -> str:
         ntext.text = t.get("label", t.get("id"))
 
     # Arcs
+    weights = data.get("weights", {})
+    print(weights)
+
     for arc_info in data.get("arcs", []):
         arc = ET.SubElement(page, "arc", {
-            "id": f"{arc_info['source']}_{arc_info['target']}",
+            "id": arc_info.get("id","0"),
             "source": arc_info["source"],
             "target": arc_info["target"]
         })
+
         ins = ET.SubElement(arc, "inscription")
         itext = ET.SubElement(ins, "text")
-        # weights = data.get("wrights")
-        itext.text = str(arc_info.get("weight", 1))
+
+        import json
+        key = json.dumps([arc_info["source"], arc_info["target"]],separators=(',', ':'))
+
+
+        weight = weights.get(key, 1)
+        print(key, ":", weight)
+
+        itext.text = str(weight)
+
 
     ET.indent(pnml, space="  ")
     return ET.tostring(pnml, encoding='unicode', xml_declaration=True)

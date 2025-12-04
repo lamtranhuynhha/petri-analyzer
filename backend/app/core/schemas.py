@@ -23,6 +23,8 @@ class ReachabilityResult(BaseModel):
     Kết quả phân tích đồ thị đạt được
     """
     states: List[Dict[str, int]] = Field(..., description="Danh sách các marking (trạng thái)")
+    initial_marking: Dict[str, int] = Field(..., description="Marking (trạng thái) ban đầu")
+    deadlocks: List[List[int]] = Field(..., description="Tập hợp các deadlock")
     edges: List[Dict[str, Any]] = Field(..., description="Danh sách các cạnh đồ thị")
     graph_image: Optional[str] = Field(None, description="Ảnh đồ thị dạng base64")
 

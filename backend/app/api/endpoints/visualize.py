@@ -25,10 +25,10 @@ async def visualize_reachability(request: VisualizationRequest):
     try:
         rg_data = request.data
         format_type = request.format.lower()
-        
         # Render với Graphviz
         image_data = render_reachability_graph(
             rg_data.get('states', []),
+            rg_data.get('initial_marking',{}),
             rg_data.get('edges', []),
             rg_data.get('deadlocks', []),
             format_type

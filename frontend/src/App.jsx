@@ -333,9 +333,9 @@ function App() {
         
         case 'boundedness': {
           const result = await api.analyzeBoundedness(data);
-          setAnalysisResult('boundedness', result.result);
+          setAnalysisResult('boundedness', result);
           updateStatus({
-            isBounded: result.result?.is_bounded,
+            isBounded: result?.is_bounded,
           });
           toast.success(
             result.result?.is_bounded
@@ -347,14 +347,14 @@ function App() {
         
         case 'liveness': {
           const result = await api.analyzeLiveness(data);
-          setAnalysisResult('liveness', result.result);
+          setAnalysisResult('liveness', result);
           toast.success('Đã phân tích liveness');
           break;
         }
         
         case 'siphonsTraps': {
           const result = await api.analyzeSiphonsTraps(data);
-          setAnalysisResult('siphonsTraps', result.result);
+          setAnalysisResult('siphonsTraps', result);
           toast.success(
             `Tìm thấy ${result.result?.minimal_siphons?.length || 0} siphons, ` +
             `${result.result?.minimal_traps?.length || 0} traps`

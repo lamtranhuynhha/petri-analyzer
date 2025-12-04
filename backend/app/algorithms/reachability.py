@@ -187,8 +187,9 @@ def analyze_reachability(
     
     # Chuyển đổi format để trả về API
     place_names = rg["places"]
-    states: List[Dict[str, int]] = []
+    markings: List[Dict[str, int]] = []
     edges: List[Dict[str, Any]] = []
+    initial_tuple = rg["initial"]
     
     # Tạo mapping từ marking tuple -> index
     node_to_index: Dict[Tuple[int, ...], int] = {}
@@ -196,7 +197,7 @@ def analyze_reachability(
         node_to_index[marking_tuple] = idx
         # Chuyển tuple thành dict
         marking_dict = {place_names[i]: marking_tuple[i] for i in range(len(place_names))}
-        states.append(marking_dict)
+        markings.append(marking_dict)
     
     # Chuyển edges sang format API
     for source_tuple, transitions in rg["edges"].items():
@@ -211,10 +212,16 @@ def analyze_reachability(
     
     # Tạo ảnh đồ thị (nếu cần)
     # graph_image = reachability_to_dot(rg)  # Có thể thêm sau
-  
+    initial_marking = {
+        place_names[i]: initial_tuple[i]
+        for i in range(len(place_names))
+    }
+    deadlocks = [list(m) for m in rg["deadlocks"]]
 
     return ReachabilityResult(
-        states=states,
+        states=markings,
+        initial_marking=initial_marking,
+        deadlocks=deadlocks,
         edges=edges,
         graph_image=None  # Sẽ thêm logic tạo ảnh sau
     )
