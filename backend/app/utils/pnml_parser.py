@@ -135,7 +135,7 @@ def generate_pnml(data: Dict[str, Any]) -> str:
 
         marking = ET.SubElement(place, "initialMarking")
         mtext = ET.SubElement(marking, "text")
-        mtext.text = str(data.get("marking", {}).get(p.get("id"), 0))
+        mtext.text = str(data.get("initial_marking", {}).get(p.get("id"), 0))
 
     # Transitions
     for t in data.get("transitions", []):

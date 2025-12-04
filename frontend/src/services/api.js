@@ -86,7 +86,7 @@ export const exportPetriNet = async (netData, format) => {
     net_data: netData,
     format,
   }, {
-    responseType: format == 'pnml' || format === 'png' || format === 'svg' ? 'blob' : 'json',
+    responseType: format === 'pnml' || format === 'png' || format === 'svg' ? 'blob' : 'json',
   });
 };
 
