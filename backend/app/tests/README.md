@@ -76,11 +76,6 @@ pytest app/tests/test_boundedness.py::TestBoundedness -v
 pytest app/tests/test_boundedness.py::TestBoundedness::test_simple_linear_net_bounded -v
 ```
 
-### Chạy với Coverage Report
-```bash
-pytest app/tests/ --cov=app.algorithms --cov-report=html
-```
-
 ## 📊 Test Coverage
 
 Mỗi thuật toán được test với:
