@@ -85,7 +85,7 @@ class PetriNet:
         arc_weights = {
             tuple(json.loads(arc)): weight
             for arc, weight in request.weights.items()
-        } # 04/12/2025
+        }
         for source, target in request.arcs:
             weight = arc_weights.get((source, target), 1)
     
