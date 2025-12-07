@@ -35,7 +35,7 @@ const WelcomeModal = () => {
           <div className="space-y-3">
             {/* Github Link */}
             <a 
-              href="https://github.com/lamtranhuynhha/petri-analyzer" // Thay link của bạn vào đây
+              href="https://github.com/lamtranhuynhha/petri-analyzer"
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-gray-800 hover:bg-gray-50 transition-all group"
