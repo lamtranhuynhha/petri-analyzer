@@ -5,7 +5,7 @@ from app.core.schemas import PetriNetRequest, DeadlockResult
 from app.models.petri_net import PetriNet
 
 
-def analyze_deadlock(request: PetriNetRequest) -> DeadlockResult:
+def analyze_deadlock(request: PetriNetRequest, max_states: int = 1000) -> DeadlockResult:
     """
     Phân tích deadlock trong mạng Petri bằng cách xây dựng đồ thị đạt được.
 
@@ -56,7 +56,7 @@ def analyze_deadlock(request: PetriNetRequest) -> DeadlockResult:
             if new_marking_tuple not in visited:
                 visited.add(new_marking_tuple)
                 queue.append(new_marking)
-    
+
     return DeadlockResult(
         total_states=len(visited),
         total_deadlocks=len(deadlock_markings),

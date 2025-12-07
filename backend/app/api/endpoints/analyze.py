@@ -19,9 +19,9 @@ from app.algorithms.boundedness import analyze_boundedness
 router = APIRouter(prefix="/api/analyze", tags=["Analysis"])
 
 @router.post("/deadlock", response_model=DeadlockResult)
-def api_analyze_deadlock(request: PetriNetRequest):
+def api_analyze_deadlock(request: PetriNetRequest, max_states: int = 1000):
     try:
-        result = analyze_deadlock(request)
+        result = analyze_deadlock(request, max_states=max_states)
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error analyzing deadlock: {str(e)}")
