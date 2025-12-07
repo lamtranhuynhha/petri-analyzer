@@ -29,6 +29,39 @@ Dự án này được phát triển nhằm xây dựng một **công cụ trự
 - Export PNG/SVG
 - Interactive zoom và pan
 
+## Công nghệ sử dụng
+
+**Frontend:**
+- React 18
+- React Flow - Canvas visualization
+- Tailwind CSS - Styling
+- Zustand - State management
+- Axios - API client
+
+**Backend:**
+- FastAPI - Web framework
+- Pydantic - Data validation
+- Graphviz - Graph visualization
+- lxml - PNML parsing
+
+## Thuật toán
+
+- **Algorithm 1**: Reachability Graph Construction
+- **Algorithm 2**: Deadlock Detection
+- **Algorithm 3**: Siphons & Traps
+- **Algorithm 4**: Coverability Tree
+- **Algorithm 5**: Tarjan SCC
+- **Algorithm 6**: Liveness Classification
+
+## Tiến độ
+- Tuần 1–2: Nghiên cứu lý thuyết, viết đặc tả đề tài.
+- Tuần 3-4: Nghiên cứu thuật toán, viết mã giả.  
+- Tuần 5-6: Hiện thực thuật toán, kiểm thử.
+- Tuần 7: Tích hợp các thuật toán, kiểm thử.
+- Tuần 8-8: Hiện thực frontend.
+- Tuần 10-11: Hiện thực backend, tích hợp API.
+- Tuần 12: Hoàn thiện báo cáo, demo.
+
 ## Cài đặt
 
 ### Backend
@@ -37,7 +70,7 @@ Dự án này được phát triển nhằm xây dựng một **công cụ trự
 cd backend
 
 # Cài đặt Graphviz
-# Ubuntu: sudo apt-get install graphviz
+# Ubuntu: sudo apt-get install graphviz (khuyến khích)
 # macOS: brew install graphviz
 # Windows: Download từ https://graphviz.org/download/
 
@@ -85,42 +118,10 @@ petri-analyzer/
 │   │   └── services/      # API client
 │   └── package.json
 │
-├── docs/                  # Tài liệu thiết kế
+├── docs/                  # Tài liệu thiết kế (truy cập để đọc kĩ tài liệu về cấu trúc dự án, thiết kế của nhóm, hướng dẫn sử dụng và kiểm thử )
+├── test/                  # Các mẫu json ví dụ
 └── README.md
 ```
-
-## Công nghệ sử dụng
-
-**Frontend:**
-- React 18
-- React Flow - Canvas visualization
-- Tailwind CSS - Styling
-- Zustand - State management
-- Axios - API client
-
-**Backend:**
-- FastAPI - Web framework
-- Pydantic - Data validation
-- Graphviz - Graph visualization
-- lxml - PNML parsing
-
-## Thuật toán
-
-- **Algorithm 1**: Reachability Graph Construction
-- **Algorithm 2**: Deadlock Detection
-- **Algorithm 3**: Siphons & Traps
-- **Algorithm 4**: Coverability Tree
-- **Algorithm 5**: Tarjan SCC
-- **Algorithm 6**: Liveness Classification
-
-## Tiến độ (sẽ cập nhật)
-- Tuần 1–2: Nghiên cứu lý thuyết, viết đặc tả đề tài.
-- Tuần 3-4: Nghiên cứu thuật toán, viết mã giả.  
-- Tuần 5-6: Hiện thực thuật toán, kiểm thử.
-- Tuần 7: Tích hợp các thuật toán, kiểm thử.
-- Tuần 8-8: Hiện thực frontend.
-- Tuần 10-11: Hiện thực backend, tích hợp API.
-- Tuần 12: Hoàn thiện báo cáo, demo.
 
 ## License
 

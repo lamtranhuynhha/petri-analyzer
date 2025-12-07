@@ -1,0 +1,20 @@
+{
+    "places": [
+      {"id":"p1","label":"p1","position":{"x":180,"y":150}},
+      {"id":"p2","label":"p2","position":{"x":180,"y":250}}
+    ],
+    "transitions": [
+      {"id":"t1","label":"t1","position":{"x":300,"y":200}}
+    ],
+    "arcs": [
+      {"source":"p1","target":"t1"},
+      {"source":"t1","target":"p1"},
+      {"source":"t1","target":"p2"}
+    ],
+    "weights": {
+      "[\"p1\",\"t1\"]":1,
+      "[\"t1\",\"p1\"]":1,
+      "[\"t1\",\"p2\"]":1
+    },
+    "initial_marking":{"p1":1,"p2":0}
+  }

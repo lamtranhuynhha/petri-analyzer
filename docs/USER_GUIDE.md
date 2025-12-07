@@ -1,4 +1,4 @@
-# Petri Net Analyzer – Hướng dẫn sử dụng
+# Petri Net Analyzer – Hướng dẫn sử dụng và kiểm thử
 
 ## 1. Giới thiệu
 
@@ -258,3 +258,50 @@ Một số phím tắt mặc định:
    - Export trace để phân tích thêm hoặc báo cáo.
 
 ---
+
+### Lưu ý về cấu trúc file JSON
+Các file JSON của dự án tuân thủ schema:
+``` json
+{
+  "places": [
+    {
+      "id": "p1",
+      "label": "p1",
+      "position": { "x": 200, "y": 200 }
+    }
+  ],
+  "transitions": [
+    {
+      "id": "t1",
+      "label": "t1",
+      "position": { "x": 400, "y": 200 }
+    }
+  ],
+  "arcs": [
+    { "source": "p1", "target": "t1" },
+    { "source": "t1", "target": "p2" }
+  ],
+  "weights": {
+    "[\"p1\",\"t1\"]": 1,
+    "[\"t1\",\"p2\"]": 1
+  },
+  "initial_marking": {
+    "p1": 1,
+    "p2": 0
+  }
+}
+```
+* **places**: danh sách place
+  * **id**: định danh duy nhất (ví dụ `p1`, `p2`)
+  * **label**: nhãn hiển thị (nếu thiếu, UI sẽ dùng `id`)
+  * **position**: toạ độ hiển thị `{ "x": number, "y": number }`
+* **transitions**: danh sách transition (cùng cấu trúc với `places`, nhưng là transition)
+* **arcs**: danh sách cung
+  * **source**: id place/transition đầu
+  * **target**: id place/transition cuối
+* **weights**:
+  * Key: chuỗi JSON `["source","target"]`, ví dụ `"[\"p1\",\"t1\"]"`
+  * Value: trọng số (mặc định 1 nếu không khai báo)
+* **initial_marking**: map `{ placeId: số_token_ban_đầu }`
+
+Nếu người dùng tự tạo file JSON mới để dùng tính năng Import JSON, đảm bảo tuân thủ theo schema trên. Tham khảo thư mục test/ để xem các ví dụ minh họa nhóm đã tạo sẵn

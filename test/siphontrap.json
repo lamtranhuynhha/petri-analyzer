@@ -1,0 +1,26 @@
+{
+    "places": [
+      {"id":"p1","label":"p1","position":{"x":120,"y":150}},
+      {"id":"p2","label":"p2","position":{"x":300,"y":150}},
+      {"id":"p3","label":"p3","position":{"x":480,"y":150}}
+    ],
+    "transitions": [
+      {"id":"t1","label":"t1","position":{"x":210,"y":100}},
+      {"id":"t2","label":"t2","position":{"x":390,"y":100}}
+    ],
+    "arcs": [
+      {"source":"p1","target":"t1"},
+      {"source":"t1","target":"p2"},
+      {"source":"p2","target":"t2"},
+      {"source":"t2","target":"p3"},
+      {"source":"p3","target":"t2"}
+    ],
+    "weights": {
+      "[\"p1\",\"t1\"]":1,
+      "[\"t1\",\"p2\"]":1,
+      "[\"p2\",\"t2\"]":1,
+      "[\"t2\",\"p3\"]":1,
+      "[\"p3\",\"t2\"]":1
+    },
+    "initial_marking":{"p1":1,"p2":0,"p3":0}
+  }
