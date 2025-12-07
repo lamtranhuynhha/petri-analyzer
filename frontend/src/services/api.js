@@ -46,8 +46,8 @@ apiClient.interceptors.response.use(
 
 /**
  * Upload PNML or JSON file
- * @param {File} file - File object to upload
- * @returns {Promise} - Parsed Petri Net data
+ * file - File object to upload
+ * returns Parsed Petri Net data
  */
 export const uploadPetriNet = async (file) => {
   const formData = new FormData();
@@ -62,10 +62,10 @@ export const uploadPetriNet = async (file) => {
 
 /**
  * Convert between PNML and JSON formats
- * @param {string} inputFormat - 'pnml' or 'json'
- * @param {string} outputFormat - 'pnml' or 'json'
- * @param {string} data - Data to convert
- * @returns {Promise} - Converted data
+ * string inputFormat - 'pnml' or 'json'
+ * string outputFormat - 'pnml' or 'json'
+ * string data - Data to convert
+ * returns Converted data
  */
 export const convertFormat = async (inputFormat, outputFormat, data) => {
   return await apiClient.post('/net/convert', {
@@ -77,9 +77,9 @@ export const convertFormat = async (inputFormat, outputFormat, data) => {
 
 /**
  * Export Petri Net to specified format
- * @param {Object} netData - Petri Net data
- * @param {string} format - 'pnml', 'json', 'png', 'svg'
- * @returns {Promise} - Export result
+ * object netData - Petri Net data
+ * string format - 'pnml', 'json', 'png', 'svg'
+ * returns Export result
  */
 export const exportPetriNet = async (netData, format) => {
   return await apiClient.post('/net/export', {
@@ -92,48 +92,22 @@ export const exportPetriNet = async (netData, format) => {
 
 // ============ ANALYSIS OPERATIONS ============
 
-/**
- * Analyze Reachability Graph
- * @param {Object} netData - Petri Net data
- * @returns {Promise} - RG data with states and edges
- */
 export const analyzeReachability = async (netData) => {
-
   return await apiClient.post('/analyze/reachability', netData);
 };
 
-/**
- * Detect deadlocks
- * @param {Object} netData - Petri Net data
- * @returns {Promise} - Deadlock information
- */
 export const analyzeDeadlock = async (netData) => {
   return await apiClient.post('/analyze/deadlock', netData);
 };
 
-/**
- * Check boundedness
- * @param {Object} netData - Petri Net data
- * @returns {Promise} - Boundedness analysis result
- */
 export const analyzeBoundedness = async (netData) => {
   return await apiClient.post('/analyze/boundedness', netData);
 };
 
-/**
- * Check liveness
- * @param {Object} netData - Petri Net data
- * @returns {Promise} - Liveness analysis result
- */
 export const analyzeLiveness = async (netData) => {
   return await apiClient.post('/analyze/liveness', netData);
 };
 
-/**
- * Compute siphons and traps
- * @param {Object} netData - Petri Net data
- * @returns {Promise} - Siphons and traps
- */
 export const analyzeSiphonsTraps = async (netData) => {
   return await apiClient.post('/analyze/siphons-traps', netData);
 };
@@ -142,9 +116,9 @@ export const analyzeSiphonsTraps = async (netData) => {
 
 /**
  * Get visualization of Reachability Graph
- * @param {Object} rgData - RG data (states, edges)
- * @param {string} format - 'png' or 'svg'
- * @returns {Promise} - Image data
+ * Object rgData - RG data (states, edges)
+ * string format - 'png' or 'svg'
+ * returns Image data
  */
 export const getReachabilityGraphImage = async (rgData, format = 'svg') => {
   return await apiClient.post(`/visualize/reachability`, {
@@ -157,9 +131,9 @@ export const getReachabilityGraphImage = async (rgData, format = 'svg') => {
 
 /**
  * Get visualization of Coverability Tree
- * @param {Object} treeData - Coverability tree data
- * @param {string} format - 'png' or 'svg'
- * @returns {Promise} - Image data
+ * Object treeData - Coverability tree data
+ * string format - 'png' or 'svg'
+ * returns Image data
  */
 export const getCoverabilityTreeImage = async (treeData, format = 'svg') => {
   return await apiClient.post(`/visualize/coverability`, {
@@ -170,12 +144,6 @@ export const getCoverabilityTreeImage = async (treeData, format = 'svg') => {
   });
 };
 
-/**
- * Get visualization of Petri Net
- * @param {Object} netData - Petri Net data
- * @param {string} format - 'png' or 'svg'
- * @returns {Promise} - Image data
- */
 export const getPetriNetImage = async (netData, format = 'svg') => {
   return await apiClient.post(`/visualize/petri-net`, {
     net_data: netData,
@@ -189,9 +157,9 @@ export const getPetriNetImage = async (netData, format = 'svg') => {
 
 /**
  * Get enabled transitions at current marking
- * @param {Object} netData - Petri Net data
- * @param {Object} marking - Current marking
- * @returns {Promise} - List of enabled transition IDs
+ * Object netData - Petri Net data
+ * Object marking - Current marking
+ * return List of enabled transition IDs
  */
 export const getEnabledTransitions = async (netData, marking) => {
   return await apiClient.post('/sim/enabled', {
@@ -202,10 +170,10 @@ export const getEnabledTransitions = async (netData, marking) => {
 
 /**
  * Fire a transition
- * @param {Object} netData - Petri Net data
- * @param {Object} marking - Current marking
- * @param {string} transitionId - Transition to fire
- * @returns {Promise} - New marking after firing
+ * Object netData - Petri Net data
+ * Object marking - Current marking
+ * string transitionId - Transition to fire
+ * returns New marking after firing
  */
 export const fireTransition = async (netData, marking, transitionId) => {
   return await apiClient.post('/sim/fire', {
@@ -216,11 +184,6 @@ export const fireTransition = async (netData, marking, transitionId) => {
 };
 
 // ============ HEALTH CHECK ============
-
-/**
- * Check if backend is running
- * @returns {Promise} - Health status
- */
 export const healthCheck = async () => {
   return await apiClient.get('/health');
 };

@@ -18,13 +18,13 @@ Dự án này được phát triển nhằm xây dựng một **công cụ trự
 - **Liveness**: Phân loại mức độ sống của transitions
 - **Siphons & Traps**: Tìm minimal siphons và traps
 
-### ▶️ Mô phỏng
+### Mô phỏng
 - Fire transitions thủ công
 - Auto-play mode
 - Tracking firing history
 - Hiển thị enabled transitions real-time
 
-### 🎨 Visualization
+### Visualization
 - Graphviz rendering cho RG và Coverability Tree
 - Export PNG/SVG
 - Interactive zoom và pan

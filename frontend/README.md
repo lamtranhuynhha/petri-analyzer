@@ -18,7 +18,6 @@ npm install
 
 ```bash
 cp .env.example .env
-# Chỉnh sửa .env nếu cần (API URL, etc.)
 ```
 
 ## Chạy development server
