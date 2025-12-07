@@ -101,5 +101,3 @@ async def visualize_petri_net(request: VisualizationRequest):
     
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error visualizing Petri Net: {str(e)}")
-
-

@@ -127,9 +127,9 @@ def weighted_net():
             ["t2", "p3"]
         ],
         weights={
-            "p1->t1": 2,  # t1 cần 2 token từ p1
-            "t1->p2": 3,  # t1 tạo 3 token vào p2
-            "p2->t2": 2   # t2 cần 2 token từ p2
+            "[\"p1\", \"t1\"]": 2,  # t1 cần 2 token từ p1
+            "[\"t1\", \"p2\"]": 3,  # t1 tạo 3 token vào p2
+            "[\"p2\", \"t2\"]": 2   # t2 cần 2 token từ p2
         },
         initial_marking={"p1": 4, "p2": 0, "p3": 0}
     )

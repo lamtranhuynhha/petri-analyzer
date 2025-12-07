@@ -108,7 +108,7 @@ petri-analyzer/
 
 - **Algorithm 1**: Reachability Graph Construction
 - **Algorithm 2**: Deadlock Detection
-- **Algorithm 3**: Siphons & Traps (CSP-based)
+- **Algorithm 3**: Siphons & Traps
 - **Algorithm 4**: Coverability Tree
 - **Algorithm 5**: Tarjan SCC
 - **Algorithm 6**: Liveness Classification
