@@ -7,32 +7,42 @@ from app.models.petri_net import PetriNet
 
 class SCCFinder:
     def __init__(self, root,nodes,edges):
-        self.root:tuple[int] = root    # tuple: initial marking
-        self.nodes: set[tuple] = nodes  # set: marking tuple -> PetriNet
-        self.graph: dict[tuple, list[tuple[str, tuple]]] = edges  # dict: node -> list of (transition_name, target_node)
+        self.root:tuple[int] = root   
+        self.nodes: set[tuple] = nodes  
+        self.graph: dict[tuple, list[tuple[str, tuple]]] = edges  
         self.idx:int  = 0
         self.stack = []
-        self.visited = []
+        self.visited = set() 
         self.lowest = {}
         self.num = {}
         self.on_stack = set()
-        self.scc = []       # list of list of nodes (marking tuples)
+        self.scc = []      
 
     def run(self):
+        # Đảm bảo reset lại trạng thái nếu run lại
+        self.visited.clear()
+        self.stack.clear()
+        self.on_stack.clear()
+        self.scc.clear()
+        self.lowest.clear()
+        self.num.clear()
+        self.idx = 0
+
         for node in self.nodes:
             if node not in self.visited:
                 self.strongconnect(node)
         return self.scc
-    
+
     def strongconnect(self, node):
-        self.visited.append(node)
+        self.visited.add(node)
         self.num[node] = self.idx
         self.lowest[node] = self.idx
         self.on_stack.add(node)
         self.idx += 1
         self.stack.append(node)
 
-        for transition, neighbor in self.graph.get(node, []):
+        neighbors = self.graph.get(node, [])
+        for transition, neighbor in neighbors:
             if neighbor not in self.visited:
                 self.strongconnect(neighbor)
                 self.lowest[node] = min(self.lowest[node], self.lowest[neighbor])
@@ -40,19 +50,25 @@ class SCCFinder:
                 self.lowest[node] = min(self.lowest[node], self.num[neighbor])
 
         if self.lowest[node] == self.num[node]:
-            component = []
-            component_edges = []
+            component_nodes = []
             while True:
                 w = self.stack.pop()
                 self.on_stack.remove(w)
-                component.append(w)
+                component_nodes.append(w)
                 if w == node:
                     break
-            for w in component:
+            
+            # Tìm các cạnh nội bộ (internal edges) của SCC này
+            component_edges = set()
+            node_set = set(component_nodes)
+            
+            for w in component_nodes:
                 for transition, neighbor in self.graph.get(w, []):
-                        if neighbor in component and transition not in component_edges:
-                            component_edges.append(transition)
-            self.scc.append((component, component_edges))
+                    if neighbor in node_set:
+                        component_edges.add(transition)
+            
+            self.scc.append((component_nodes, list(component_edges)))
+
 
 def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -> Dict[str, Any]:
     """
@@ -62,10 +78,10 @@ def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -
     visited: Set[Tuple[Tuple[str, int], ...]] = set()
     edges: Dict[Tuple, List[Tuple[str, Tuple]]] = {}
     queue: deque = deque()
-    
+
     initial_marking = net.get_initial_marking()
     initial_tuple = tuple(sorted(initial_marking.items()))
-    
+
     queue.append(initial_marking)
     visited.add(initial_tuple)
     nodes = {initial_tuple}
@@ -79,23 +95,23 @@ def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -
 
         current_marking = queue.popleft()
         current_tuple = tuple(sorted(current_marking.items()))
-        
+
         enabled_transitions = net.get_enabled_transitions(current_marking)
-        
+
         for transition in enabled_transitions:
             new_marking = net.fire_transition(transition, current_marking.copy())
             new_tuple = tuple(sorted(new_marking.items()))
-            
+
             if new_tuple not in visited:
                 visited.add(new_tuple)
                 nodes.add(new_tuple)
                 queue.append(new_marking)
-            
+
             # Thêm edge
             if current_tuple not in edges:
                 edges[current_tuple] = []
             edges[current_tuple].append((transition, new_tuple))
-    
+
     return {
         'initial': initial_tuple,
         'nodes': nodes,
@@ -114,94 +130,121 @@ def check_liveness(petri_net: PetriNet) -> Dict[str, Tuple[bool, bool, bool, boo
     - Live: Transition có thể được kích hoạt từ bất kỳ trạng thái nào trong đồ thị reachability.
     """
     # Xây dựng reachability graph
-    reachability_graph = _build_reachability_graph_internal(petri_net)
-    # Tìm SCC Strong reachability graph
-    graph = SCCFinder(reachability_graph['initial'], reachability_graph['nodes'], reachability_graph['edges'])
-    sccs = graph.run()
+    try:
+        rg = _build_reachability_graph_internal(petri_net)
+    except Exception as e:
+        print(f"Liveness Check Error: {e}")
+        return {}
 
-    # Khởi tạo bảng liveness
-    liveness_table = {}
-    """
-    Kiểm tra dead
-    Một transition là dead nếu nó không xuất hiện trong đồ thị reachability.
-    """
-    def is_dead (transition):
-        for marking in reachability_graph['nodes']:
-            for t,next_marking in reachability_graph['edges'].get(marking, []):
-                if t == transition:
-                    return False
-        return True
-    
-    """
-    Kiểm tra L4-live
-    Một transition là L4-live nếu nó xuất hiện trong tất cả các SCC của đồ thị reachability. 
-    Đồng nghĩa với việc từ bất kỳ trạng thái nào trong đồ thị reachability, transition có thể được kích hoạt.
-    """
-            
-    def is_live (transition):
-        for scc_nodes, scc_edges in sccs:
-            if transition not in scc_edges:
-                return False
-        return True
-    
-    """
-    Kiểm tra L3-live
-    Một transition là L3-live nếu nó xuất hiện trong một số SCC của đồ thị reachability. 
-    Đồng nghĩa với việc từ một số trạng thái trong đồ thị reachability, transition có thể được kích hoạt vô hạn lần.
-    """
+    nodes = rg['nodes']
+    edges = rg['edges']
 
-    def is_L3_live (transition):
-        for scc_nodes, scc_edges in sccs:
-            if transition in scc_edges:
-                return True
-        return False
-    
-    """
-    Kiểm tra L2-live
-    Một transition là L2-live nếu nó có thể được kích hoạt k (k>1) lần trong một số chuỗi.
-    """
-    
-    def is_L2_live (transition):
-        marking_fire_transition= [(m, n) for m in reachability_graph['nodes']
-                                    for t, n in reachability_graph['edges'].get(m, [])
-                                    if t == transition]
+    # 1. Tìm SCCs
+    scc_finder = SCCFinder(rg['initial'], nodes, edges)
+    sccs = scc_finder.run()
+
+    #Tìm Sink SCCs
+    node_to_scc_idx = {}
+    for idx, (scc_nodes, _) in enumerate(sccs):
+        for node in scc_nodes:
+            node_to_scc_idx[node] = idx
+    num_sccs = len(sccs)
+    scc_has_outgoing = [False] * num_sccs
+
+    for u, neighbors in edges.items():
+        u_idx = node_to_scc_idx[u]
+        for _, v in neighbors:
+            v_idx = node_to_scc_idx.get(v)
+            # Nếu có cạnh nối từ u (thuộc SCC này) sang v (thuộc SCC KHÁC)
+            if v_idx is not None and u_idx != v_idx:
+                scc_has_outgoing[u_idx] = True
+
+    sink_sccs_indices = [i for i, has_out in enumerate(scc_has_outgoing) if not has_out]
+
+    # --- Helper Functions ---
+    def get_all_transitions_in_rg():
+        found = set()
+        for neighbors in edges.values():
+            for t, _ in neighbors:
+                found.add(t)
+        return found
+
+    all_transitions_in_rg = get_all_transitions_in_rg()
+
+    def check_l2_by_dfs(transition):
+        """Kiểm tra xem transition có bắn được ít nhất 2 lần trên một đường đi không"""
+        starts = []
+        for u, neighbors in edges.items():
+            for t_name, v in neighbors:
+                if t_name == transition:
+                    starts.append((u, v))
         
-        if len (marking_fire_transition) < 2:
+        if len(starts) < 2:
             return False
 
-        for u1, v1 in marking_fire_transition:
-            visited = set()
-            stack = [v1]
-            while stack:
-                cur = stack.pop()
-                if cur in visited:
-                    continue
-                visited.add(cur)
-                # Nếu cur là đầu của cạnh khác cũng là t
-                if any(cur == u2 for (u2, _) in marking_fire_transition if u2 != u1):
-                    return True
-                for _, nxt in reachability_graph['edges'].get(cur, []):
-                    if nxt not in visited:
-                        stack.append(nxt)
+        for _, v1 in starts:
+            queue = deque([v1])
+            visited_local = {v1}
+            while queue:
+                curr = queue.popleft()
+                if curr in edges:
+                    for t_next, v_next in edges[curr]:
+                        if t_next == transition:
+                            return True
+                        if v_next not in visited_local:
+                            visited_local.add(v_next)
+                            queue.append(v_next)
         return False
-    
-    """
-    L4 => L3 => L2 => L1 => Not Dead
-    Điền bảng liveness
-    """
-    transition_list = list(petri_net.transitions)  # transitions là Set[str], không phải dict
-    for t in transition_list:
-        if is_dead(t):
-            liveness_table[t] = (True, False,False,False,False)
-        elif is_live(t):
-            liveness_table[t] = (False,True,True,True,True)
-        elif is_L3_live(t):
-            liveness_table[t] = (False,True,True,True,False)
-        elif is_L2_live(t):
-            liveness_table[t] = (False,True,True,False,False)
-        else: liveness_table[t] = (False,True,False,False,False)
-    
-    
+
+    # ---------------------------------------------------------
+    # Logic Xếp hạng Liveness
+    # ---------------------------------------------------------
+    liveness_table = {}
+    all_transitions_defined = list(petri_net.transitions)
+
+    for t in all_transitions_defined:
+        # Check Dead (L0)
+        if t not in all_transitions_in_rg:
+            liveness_table[t] = (True, False, False, False, False)
+            continue
+
+        # Check Live (L4)
+        # Transition phải xuất hiện trong cạnh nội bộ của TẤT CẢ các Sink SCCs
+        is_l4 = True
+        if not sink_sccs_indices:
+            is_l4 = False
+        else:
+            for idx in sink_sccs_indices:
+                scc_edges = sccs[idx][1]
+                if t not in scc_edges:
+                    is_l4 = False
+                    break
+        
+        if is_l4:
+            liveness_table[t] = (False, True, True, True, True)
+            continue
+
+        # Check L3
+        # Chỉ cần xuất hiện trong BẤT KỲ một SCC nào (có vòng lặp)
+        is_l3 = False
+        for _, scc_edges in sccs:
+            if t in scc_edges:
+                is_l3 = True
+                break
+        
+        if is_l3:
+            liveness_table[t] = (False, True, True, True, False)
+            continue
+
+        # Level 2: Fireable k times (k >= 2)
+        # Nếu không phải L3 (không loop), check xem có bắn được 2 lần trên đường thẳng không
+        if check_l2_by_dfs(t):
+            liveness_table[t] = (False, True, True, False, False)
+            continue
+
+        # Check L1 (Nếu đã không Dead thì mặc định L1)
+        liveness_table[t] = (False, True, False, False, False)
+
     return liveness_table
 
 
@@ -217,43 +260,49 @@ def analyze_liveness(request: PetriNetRequest) -> BoundednessLivenessResult:
     """
     net = PetriNet(request)
     liveness_table = check_liveness(net)
-    
-    # Xác định các transition dead và unreachable
+
     dead_transitions = []
     unreachable_transitions = []
     live_transitions = []
-    liveness_level = 4  # Mặc định là mức cao nhất
     transition_liveness_levels = {}
     
+    # Khởi tạo min_level là mức cao nhất, sẽ giảm dần nếu gặp mức thấp hơn
+    min_level = 4 
+
     for transition, (is_dead, is_L1, is_L2, is_L3, is_L4) in liveness_table.items():
+        level = 0
         if is_dead:
             level = 0
             dead_transitions.append(transition)
             unreachable_transitions.append(transition)
-            liveness_level = min(liveness_level, 0)  # Nếu có transition dead, liveness_level = 0
-        elif is_L4:  # L4-live = fully live
+        elif is_L4:
             level = 4
             live_transitions.append(transition)
         elif is_L3:
             level = 3
-            liveness_level = min(liveness_level, 3)
         elif is_L2:
             level = 2
-            liveness_level = min(liveness_level, 2)
         elif is_L1:
             level = 1
-            liveness_level = min(liveness_level, 1)
+            
         transition_liveness_levels[transition] = level
-    
-    # Petri net được coi là live nếu tất cả transitions đều L4-live
-    is_live = len(live_transitions) == len(net.transitions) and len(dead_transitions) == 0
-    
+        
+        # Cập nhật mức độ sống của toàn mạng (là mức thấp nhất của các transition)
+        if level < min_level:
+            min_level = level
+
+    # Mạng Petri được gọi là Live (L4-system) nếu tất cả transition đều là L4
+    is_system_live = (len(live_transitions) == len(net.transitions)) and (len(dead_transitions) == 0)
+
+    if not net.transitions:
+        min_level = 0
+
     return BoundednessLivenessResult(
         is_bounded=True,
         bound=None,
         unbounded_places=[],
-        is_live=is_live,
-        liveness_level=liveness_level,
+        is_live=is_system_live,
+        liveness_level=min_level,
         unreachable_transitions=unreachable_transitions,
         transition_liveness_levels=transition_liveness_levels
     )
