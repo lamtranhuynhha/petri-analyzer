@@ -87,19 +87,23 @@ Parser sẽ đọc XML PNML và sinh JSON theo đúng format trên. Đây là đ
     {"p1": 0, "p2": 1, "p3": 0},
     {"p1": 0, "p2": 0, "p3": 1}
   ],
+  "initial_marking": {"p1": 1, "p2": 0, "p3": 0},
+  "deadlocks": [[2]],
   "edges": [
     {"from": 0, "to": 1, "transition": "t1"},
     {"from": 1, "to": 2, "transition": "t2"}
   ],
-  "graph_image": "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIi..."
+  "graph_image": null
 }
 ```
 
-| **Trường**     | **Kiểu**             | **Mô tả**                                      |
-|-----------------|----------------------|-----------------------------------------------|
-| `states`       | List[Dict[str, int]] | Các marking (trạng thái)                      |
-| `edges`        | List[Dict[str, Any]] | Các cạnh tương ứng với firing transition      |
-| `graph_image`  | str                  | Ảnh SVG/PNG mã hóa base64 sinh bởi Graphviz   |
+| **Trường**        | **Kiểu**             | **Mô tả**                                      |
+|--------------------|----------------------|-----------------------------------------------|
+| `states`          | List[Dict[str, int]] | Các marking (trạng thái)                      |
+| `initial_marking` | Dict[str, int]       | Marking ban đầu                               |
+| `deadlocks`       | List[List[int]]      | Danh sách các tập chỉ số state là deadlock    |
+| `edges`           | List[Dict[str, Any]] | Các cạnh tương ứng với firing transition      |
+| `graph_image`     | Optional[str]        | Ảnh đồ thị dạng base64 (hiện tại thường để `null`) |
 
 ---
 
@@ -126,18 +130,27 @@ Parser sẽ đọc XML PNML và sinh JSON theo đúng format trên. Đây là đ
 ```json
 {
   "is_bounded": true,
+  "bound": 3,
   "unbounded_places": [],
   "is_live": true,
-  "unreachable_transitions": []
+  "liveness_level": 4,
+  "unreachable_transitions": [],
+  "transition_liveness_levels": {
+    "t1": 4,
+    "t2": 3
+  }
 }
 ```
 
-| **Trường**               | **Kiểu**     | **Mô tả**                                      |
-|---------------------------|--------------|-----------------------------------------------|
-| `is_bounded`             | bool         | Petri Net có bị unbounded hay không           |
-| `unbounded_places`       | List[str]    | Danh sách place có token tăng vô hạn          |
-| `is_live`                | bool         | Petri Net có đảm bảo liveness không           |
-| `unreachable_transitions`| List[str]    | Danh sách transition không bao giờ firing được|
+| **Trường**                   | **Kiểu**           | **Mô tả**                                      |
+|-------------------------------|--------------------|-----------------------------------------------|
+| `is_bounded`                 | bool               | Petri Net có bị unbounded hay không           |
+| `bound`                      | Optional[int]      | Giá trị k-bounded toàn mạng (None nếu unbounded) |
+| `unbounded_places`           | List[str]          | Danh sách place có token tăng vô hạn          |
+| `is_live`                    | bool               | Petri Net có đảm bảo liveness không (tổng quát) |
+| `liveness_level`             | int                | Mức liveness tổng thể (0-4)                   |
+| `unreachable_transitions`    | List[str]          | Danh sách transition không bao giờ firing được|
+| `transition_liveness_levels` | Dict[str, int]     | Mức liveness của từng transition (0-4)        |
 
 ---
 
@@ -194,14 +207,14 @@ Frontend chỉ cần:
 
 ## 7️⃣ Tích hợp tổng quát
 
-| **Bước** | **API**               | **Input**       | **Output**                     |
-|----------|------------------------|-----------------|--------------------------------|
-| 1️⃣      | `/convert/pnml`       | PNML file       | JSON chuẩn                    |
-| 2️⃣      | `/analyze/reachability`| JSON chuẩn      | States, edges, graph_image    |
-| 3️⃣      | `/analyze/deadlock`   | JSON chuẩn      | Deadlock markings             |
-| 4️⃣      | `/analyze/liveness`   | JSON chuẩn      | Liveness, unreachable transitions |
-| 5️⃣      | `/analyze/boundedness`| JSON chuẩn      | Boundedness info              |
-| 6️⃣      | `/analyze/siphon-trap`| JSON chuẩn      | Siphons & traps               |
+| **Bước** | **API**                        | **Input**       | **Output**                     |
+|----------|---------------------------------|-----------------|--------------------------------|
+| 1️⃣      | `/api/net/convert`             | PNML/JSON       | JSON chuẩn                    |
+| 2️⃣      | `/api/analyze/reachability`    | JSON chuẩn      | States, edges, deadlocks...   |
+| 3️⃣      | `/api/analyze/deadlock`        | JSON chuẩn      | Deadlock markings             |
+| 4️⃣      | `/api/analyze/liveness`        | JSON chuẩn      | Liveness, unreachable transitions |
+| 5️⃣      | `/api/analyze/boundedness`     | JSON chuẩn      | Boundedness + liveness info   |
+| 6️⃣      | `/api/analyze/siphons-traps`   | JSON chuẩn      | Siphons & traps               |
 
 ---
 

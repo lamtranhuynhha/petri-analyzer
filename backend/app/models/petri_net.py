@@ -58,8 +58,7 @@ class Arc:
 
 class PetriNet:
     """
-    Lớp đại diện cho một mạng Petri với kiến trúc được cải tiến.
-    Kế thừa các ưu điểm từ petri_netV2.py nhưng tối ưu hóa cho mục đích phân tích.
+    Lớp đại diện cho một mạng Petri
     """
     
     def __init__(self, request: PetriNetRequest):

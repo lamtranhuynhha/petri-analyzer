@@ -50,7 +50,6 @@ uvicorn app.main:app --host 0.0.0.0 --port 8000
 
 Server sẽ chạy tại: http://127.0.0.1:8000
 
-API docs: http://127.0.0.1:8000/docs
 
 ## Cấu trúc thư mục
 
@@ -86,12 +85,3 @@ backend/
 - `POST /api/visualize/coverability` - Render coverability tree
 - `POST /api/visualize/petri-net` - Render Petri Net
 
-## Testing
-
-```bash
-pytest
-```
-
-## License
-
-MIT

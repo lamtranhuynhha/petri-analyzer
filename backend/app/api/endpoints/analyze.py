@@ -1,7 +1,5 @@
 """
-analyze.py
-------------
-Các API phân tích Petri Net (deadlock, reachability, v.v.)
+Các API phân tích Petri Net
 """
 
 from fastapi import APIRouter, HTTPException
@@ -19,7 +17,6 @@ from app.algorithms.reachability import analyze_reachability
 from app.algorithms.boundedness import analyze_boundedness
 
 router = APIRouter(prefix="/api/analyze", tags=["Analysis"])
-
 
 @router.post("/deadlock", response_model=DeadlockResult)
 def api_analyze_deadlock(request: PetriNetRequest):

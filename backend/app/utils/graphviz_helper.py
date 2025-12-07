@@ -37,7 +37,6 @@ def generate_rg_dot(
     lines.append('  edge [fontname="Helvetica", fontsize=10, arrowsize=0.8];')
     lines.append("  ")
 
-    # --- MÀU SẮC ---
     COLOR_START_FILL = "#E8F5E9" 
     COLOR_START_BORDER = "#2E7D32"
     

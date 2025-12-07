@@ -216,8 +216,6 @@ def analyze_reachability(
                 'transition': transition_name
             })
     
-    # Tạo ảnh đồ thị (nếu cần)
-    # graph_image = reachability_to_dot(rg)  # Có thể thêm sau
     initial_marking = {
         place_names[i]: initial_tuple[i]
         for i in range(len(place_names))
@@ -229,5 +227,5 @@ def analyze_reachability(
         initial_marking=initial_marking,
         deadlocks=deadlocks,
         edges=edges,
-        graph_image=None  # Sẽ thêm logic tạo ảnh sau
+        graph_image=None
     )

@@ -73,7 +73,8 @@ petri-analyzer/
 │   ├── 01_NAMING_CONVENTION.md     # Quy tắc đặt tên, Git commit rule
 │   ├── 02_API_SPEC.md              # Mô tả các endpoint FastAPI
 │   ├── 03_DATA_SCHEMA.md           # Chuẩn hóa cấu trúc dữ liệu Petri Net
-│   └── 05_UI_MOCKUP.fig            # UI prototype (Figma file)
+│   ├── 04_PLAN_DESIGN.md           # Thiết kế tổng quan kiến trúc & luồng
+│   └── USER_GUIDE.md               # Hướng dẫn sử dụng ứng dụng
 │
 │
 ├── assets/

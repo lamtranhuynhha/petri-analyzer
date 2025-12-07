@@ -1,6 +1,4 @@
 """
-net_upload.py
---------------
 API endpoints cho upload, convert và export Petri Net files
 """
 
@@ -19,8 +17,7 @@ import json
 import io
 from typing import Dict, Any
 
-router = APIRouter(prefix="/api/net", tags=["File Operations"]) #
-
+router = APIRouter(prefix="/api/net", tags=["File Operations"])
 
 @router.post("/upload", response_model=UploadFileResponse)
 async def upload_petri_net(file: UploadFile = File(...)):

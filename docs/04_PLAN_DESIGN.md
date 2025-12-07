@@ -1,9 +1,3 @@
-Dưới đây là bản thiết kế chi tiết cho một single-page web app (SPA) đáp ứng đúng các chức năng bạn liệt kê trong báo cáo. Mình sẽ chia thành 3 phần: (1) tổng quan UI/UX, (2) kiến trúc frontend–backend, (3) các API chính và luồng hoạt động.
-
-Nếu bạn muốn, mình có thể viết luôn skeleton code React + FastAPI/Flask ở bước sau.
-
----
-
 ## 1. Thiết kế giao diện: Single Page duy nhất
 
 ### 1.1. Bố cục tổng thể (layout)
@@ -60,7 +54,7 @@ Một trang duy nhất chia làm 3 vùng chính:
          - Bảng transition: t1: L3-live, t2: Dead, ...
      - Nút `Show Reachability Graph`:
        - Mở modal overlay hoặc panel dưới canvas hiển thị RG (dùng Graphviz SVG).
-       - Node deadlock tô đỏ (như yêu cầu).
+       - Node deadlock tô đỏ.
    - **Tab 3: Simulation**
      - Hiển thị marking hiện tại (vector).
      - Danh sách transition khả kích (enabled) tại marking hiện tại:
@@ -89,10 +83,9 @@ Một trang duy nhất chia làm 3 vùng chính:
   - Tool `Token`:
     - Click lên place để +1 token, Shift+click để -1 (hoặc chỉnh trong Properties).
 
-- Undo/Redo:
-  - Ctrl+Z / Ctrl+Y
-  - Hoặc nút icon `Undo` – `Redo` trong top bar.
-  - Dùng state history trong React (hoặc thư viện như `use-undo`).
+- Undo:
+  - Ctrl+Z
+  - Dùng state history trong React.
 
 ### 2.2. Import / Export
 
@@ -172,7 +165,7 @@ Một trang duy nhất chia làm 3 vùng chính:
 - Nút `Compute Siphons/Traps`:
   - Gọi `/api/analyze/siphons_traps`.
   - Backend:
-    - Dùng mô hình CSP như mô tả + Algorithm 3:
+    - Dùng Algorithm 3:
       - Tìm tất cả siphon/trap.
       - Lọc minimal.
   - Trả JSON:
@@ -255,7 +248,6 @@ Một trang duy nhất chia làm 3 vùng chính:
   - `uiState`: tab đang mở, phần tử đang chọn, lịch sử (undo/redo).
 - **Phím tắt**:
   - Ctrl+Z → undo
-  - Ctrl+Y → redo
   - Ctrl+S → trigger `Save` (download JSON).
 
 ### 3.2. Backend (Python)
@@ -265,7 +257,7 @@ Một trang duy nhất chia làm 3 vùng chính:
   - `models.py`: cấu trúc dữ liệu Petri net (P, T, F, W, M0).
   - `reachability.py`: Algorithm 1.
   - `deadlock.py`: Algorithm 2 (+ hàm enabled).
-  - `siphons_traps.py`: CSP + Algorithm 3.
+  - `siphons_traps.py`: Algorithm 3.
   - `boundedness.py`: Coverability Tree + Algorithm 4.
   - `liveness.py`: Tarjan SCC + Algorithm 5 & 6.
   - `pnml_parser.py` / `json_parser.py`: import/export.
@@ -287,8 +279,5 @@ Ví dụ (prefix `/api`):
 - Đồ thị:
   - `POST /api/graphviz/rg` (trả SVG)
   - `POST /api/graphviz/coverability` (optional)
-- Simulation (nếu làm backend-side):
-  - `POST /api/sim/enabled`
-  - `POST /api/sim/fire`
 
 Tất cả truyền/nhận đều ở dạng JSON (trừ khi trả file).

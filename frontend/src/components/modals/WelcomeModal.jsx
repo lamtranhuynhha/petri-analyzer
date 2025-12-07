@@ -49,7 +49,7 @@ const WelcomeModal = () => {
 
             {/* Tài liệu tham khảo Link */}
             <a 
-              href="#" // Thay link tài liệu của bạn vào đây
+              href="https://github.com/lamtranhuynhha/petri-analyzer/blob/main/docs/USER_GUIDE.md"
               target="_blank" 
               rel="noopener noreferrer"
               className="flex items-center gap-4 p-4 rounded-lg border border-gray-200 hover:border-red-200 hover:bg-red-50 transition-all group"
@@ -57,7 +57,7 @@ const WelcomeModal = () => {
               <FaFilePdf className="text-3xl text-red-500 group-hover:text-red-600" />
               <div className="flex-1">
                 <div className="font-semibold text-gray-800">Tài liệu tham khảo</div>
-                <div className="text-sm text-gray-500">Báo cáo & Hướng dẫn sử dụng</div>
+                <div className="text-sm text-gray-500">Hướng dẫn sử dụng</div>
               </div>
             </a>
           </div>

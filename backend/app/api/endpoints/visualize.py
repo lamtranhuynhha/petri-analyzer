@@ -1,6 +1,4 @@
 """
-visualize.py
--------------
 API endpoints cho visualization (Graphviz)
 """
 

@@ -153,24 +153,6 @@ Mạng chỉ có 1 place (edge case)
 ✓ Cyclic net: Siphons: X, Traps: Y
 ```
 
-## 🔍 Debug Tests
-
-### Chạy test với breakpoint
-```python
-# Thêm vào test code
-import pdb; pdb.set_trace()
-```
-
-### Chạy test với print statements
-```bash
-pytest app/tests/test_boundedness.py -v -s --capture=no
-```
-
-### Xem test nào failed
-```bash
-pytest app/tests/ --tb=short
-```
-
 ## ⚡ Performance Benchmarks
 
 Thời gian chạy mong đợi (trên máy trung bình):
@@ -180,29 +162,6 @@ Thời gian chạy mong đợi (trên máy trung bình):
 - **Reachability**: < 1.0s per test
 - **Siphons & Traps**: < 0.5s per test
 - **All Integration Tests**: < 10s total
-
-## 🛠️ Troubleshooting
-
-### Lỗi: Module not found
-```bash
-# Đảm bảo đang ở thư mục backend
-cd backend
-# Hoặc set PYTHONPATH
-export PYTHONPATH="${PYTHONPATH}:$(pwd)"
-```
-
-### Lỗi: Import error
-```bash
-# Cài đặt dependencies
-pip install -r requirements.txt
-```
-
-### Tests chạy chậm
-```bash
-# Chạy parallel với pytest-xdist
-pip install pytest-xdist
-pytest app/tests/ -n auto
-```
 
 ## Viết Test Mới
 
@@ -224,12 +183,7 @@ def test_new_feature(self, simple_linear_net):
 
 - [Pytest Documentation](https://docs.pytest.org/)
 - [Pytest Fixtures](https://docs.pytest.org/en/stable/fixture.html)
-- [Testing Best Practices](https://docs.pytest.org/en/stable/goodpractices.html)
 
 ## Checklist trước khi commit
 
 - [ ] Tất cả tests pass: `pytest app/tests/ -v`
-- [ ] Code coverage > 80%: `pytest app/tests/ --cov=app.algorithms`
-- [ ] Không có warnings: `pytest app/tests/ -v --strict-warnings`
-- [ ] Format code: `black app/tests/`
-- [ ] Lint code: `flake8 app/tests/`
