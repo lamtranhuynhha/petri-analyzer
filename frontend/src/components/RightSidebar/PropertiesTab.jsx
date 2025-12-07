@@ -72,7 +72,7 @@ const PropertiesTab = () => {
             </label>
             <input
               type="text"
-              value={data.label || id}
+              value={data.label ?? id}
               onChange={(e) => handleLabelChange(e.target.value)}
               className="input w-full"
               placeholder="Nhập label..."
@@ -185,7 +185,7 @@ const PropertiesTab = () => {
             </label>
             <input
               type="text"
-              value={data.label || id}
+              value={data.label ?? id}
               onChange={(e) => handleLabelChange(e.target.value)}
               className="input w-full"
               placeholder="Nhập label..."

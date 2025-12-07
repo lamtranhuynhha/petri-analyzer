@@ -2,15 +2,16 @@
 Graphviz Helper - Generate DOT files và render với Graphviz
 """
 
-from typing import List, Dict, Any
+from typing import List, Dict, Any,Tuple,Set
 import subprocess
 import tempfile
 import os
 
 def generate_rg_dot(
     states: List[Dict[str, int]],
+    initial_marking: Dict[str, int],
     edges: List[Dict[str, Any]],
-    deadlocks: List[Dict[str, int]] = None
+    deadlocks: List[List[int]] = None,
 ) -> str:
     """
     Generate DOT string phong cách "Rounded Box"
@@ -18,10 +19,10 @@ def generate_rg_dot(
     if deadlocks is None:
         deadlocks = []
     
-    deadlock_set = set()
+    deadlock_set = list()
     for marking in deadlocks:
-        marking_tuple = tuple(sorted(marking.items()))
-        deadlock_set.add(marking_tuple)
+        marking_tuple = [str(v) for v in marking]
+        deadlock_set.append(marking_tuple)
     
     lines = []
     lines.append("digraph RG {")
@@ -53,13 +54,19 @@ def generate_rg_dot(
         # Format label: (1, 0)
         sorted_values = [str(v) for k, v in sorted(marking.items())]
         marking_str = "(" + ",".join(sorted_values) + ")"
-        label_text = f"<M{idx}<BR/><B>{marking_str}</B>>"
+        label_text = f'''<
+                    <TABLE BORDER="0" CELLBORDER="0" CELLSPACING="0">
+                    <TR><TD ALIGN="CENTER"><B>M{idx}</B></TD></TR>
+                    <TR><TD ALIGN="CENTER">{marking_str}</TD></TR>
+                    </TABLE>
+                    >'''
 
-        if marking_tuple in deadlock_set:
+
+        if sorted_values in deadlock_set:
             fill = COLOR_DEAD_FILL
             border = COLOR_DEAD_BORDER
             style = "rounded,filled" 
-        elif idx == 0:
+        elif marking == initial_marking:
             fill = COLOR_START_FILL
             border = COLOR_START_BORDER
             style = "rounded,filled,bold"
@@ -342,14 +349,15 @@ def render_dot_to_image(dot_string: str, format_type: str = "svg") -> bytes:
 
 def render_reachability_graph(
     states: List[Dict[str, int]],
+    initial_marking: Dict[str, int],
     edges: List[Dict[str, Any]],
-    deadlocks: List[Dict[str, int]],
+    deadlocks: List[List[int]],
     format_type: str = "svg"
 ) -> bytes:
     """
     Render Reachability Graph to image
     """
-    dot_string = generate_rg_dot(states, edges, deadlocks)
+    dot_string = generate_rg_dot(states, initial_marking, edges, deadlocks)
     return render_dot_to_image(dot_string, format_type)
 
 
@@ -374,36 +382,3 @@ def render_petri_net(
     """
     dot_string = generate_petri_net_dot(net_data)
     return render_dot_to_image(dot_string, format_type)
-
-# --- TEST RG RENDER ---
-if __name__ == "__main__":
-    test_states = [
-        {"p1": 1, "p2": 0}, 
-        {"p1": 0, "p2": 1}, 
-        {"p1": 1, "p2": 1}, 
-        {"p1": 0, "p2": 0}, # Deadlock
-    ]
-
-    test_edges = [
-        {"from": 0, "to": 1, "transition": "t1"},
-        {"from": 1, "to": 2, "transition": "t2"},
-        {"from": 2, "to": 0, "transition": "t3"},
-        {"from": 1, "to": 3, "transition": "t4"},
-    ]
-
-    test_deadlocks = [
-        {"p1": 0, "p2": 0}
-    ]
-
-    print("Generating Reachability Graph (Rounded Style)...")
-    
-    try:
-        image_bytes = render_reachability_graph(test_states, test_edges, test_deadlocks, format_type="png")
-        
-        if image_bytes:
-            filename = "rg_rounded_style.png"
-            with open(filename, "wb") as f:
-                f.write(image_bytes)
-            print(f"DONE! File created: {filename}")
-    except Exception as e:
-        print(f"ERROR: {e}")

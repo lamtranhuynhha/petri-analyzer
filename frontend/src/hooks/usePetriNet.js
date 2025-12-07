@@ -74,6 +74,8 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
 
+    get().saveToHistory();
+
     const newMarking = { ...state.initialMarking, [place.id]: place.tokens || 0 };
     
     const shouldReset = state.simulationHistory.length > 0;
@@ -93,8 +95,6 @@ const usePetriNetStore = create((set, get) => ({
         clearInterval(state.autoPlayInterval);
       }
       
-      // get().saveToHistory(); // Tạm tắt để tránh lỗi vòng lặp
-      
       return {
         places: resetPlaces,
         initialMarking: newMarking,
@@ -107,7 +107,6 @@ const usePetriNetStore = create((set, get) => ({
     }
     
     const newPlaces = [...state.places, place];
-    // get().saveToHistory();
     
     return {
       places: newPlaces,
@@ -123,6 +122,7 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
     const newPlaces = state.places.map(p => 
       p.id === id ? { 
@@ -167,8 +167,8 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
-    // get().saveToHistory();
     const newPlaces = state.places.filter(p => p.id !== id);
     const arcsToRemove = state.arcs.filter(a => a.source === id || a.target === id);
     const newArcs = state.arcs.filter(a => a.source !== id && a.target !== id);
@@ -204,9 +204,10 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
     const newTransitions = [...state.transitions, transition];
-    // get().saveToHistory();
+    
     return {
       transitions: newTransitions,
       status: { ...state.status, elementCount: { ...state.status.elementCount, transitions: newTransitions.length } }
@@ -219,6 +220,7 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
     return {
       transitions: state.transitions.map(t => t.id === id ? { ...t, ...updates } : t),
@@ -234,8 +236,8 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
-    // get().saveToHistory();
     const newTransitions = state.transitions.filter(t => t.id !== id);
 
     const arcsToRemove = state.arcs.filter(a => a.source === id || a.target === id);
@@ -264,11 +266,12 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
     const newArcs = [...state.arcs, arc];
     const weightKey = JSON.stringify([arc.source, arc.target]);
     const newWeights = { ...state.weights, [weightKey]: arc.weight || 1 };
-    // get().saveToHistory();
+    
     return { arcs: newArcs, weights: newWeights };
   }),
 
@@ -278,6 +281,7 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
     const newArcs = state.arcs.map(a => a.id === id ? { ...a, ...updates } : a);
     const updatedArc = newArcs.find(a => a.id === id);
@@ -306,8 +310,8 @@ const usePetriNetStore = create((set, get) => ({
       return state;
     }
     get().resetSimulationIfModelChanged();
+    get().saveToHistory();
 
-    // get().saveToHistory();
     const arc = state.arcs.find(a => a.id === id);
     const newArcs = state.arcs.filter(a => a.id !== id);
     if (arc) {
@@ -621,7 +625,7 @@ setAnalysisResult: (analysisType, result) => set((state) => {
   },
 
   loadPetriNet: (data) => set((state) => {
-    // get().saveToHistory();
+    get().saveToHistory();
     return {
       places: data.places || [],
       transitions: data.transitions || [],
@@ -640,7 +644,7 @@ setAnalysisResult: (analysisType, result) => set((state) => {
   }),
 
   resetNet: () => set((state) => {
-    // get().saveToHistory();
+    get().saveToHistory();
     return {
       places: [],
       transitions: [],

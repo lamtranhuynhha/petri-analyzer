@@ -150,9 +150,9 @@ const TopBar = ({ onNew, onOpen, onSave, onExport }) => {
           {status?.isBounded === undefined || status?.isBounded === null ? (
             <span className="text-gray-500">-</span>
           ) : status.isBounded ? (
-            <span className="text-green-600 font-semibold">✅ BOUNDED</span>
+            <span className="text-green-600 font-semibold">BOUNDED</span>
           ) : (
-            <span className="text-red-600 font-semibold">⚠️ UNBOUNDED</span>
+            <span className="text-red-600 font-semibold">UNBOUNDED</span>
           )}
         </div>
         

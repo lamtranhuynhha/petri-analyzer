@@ -57,7 +57,7 @@ class SCCFinder:
 def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -> Dict[str, Any]:
     """
     Xây dựng reachability graph nội bộ cho thuật toán liveness.
-    Format tương tự petri_netV2.py để tương thích với code SCC.
+    Throw lỗi nếu số lượng trạng thái vượt quá max_states.
     """
     visited: Set[Tuple[Tuple[str, int], ...]] = set()
     edges: Dict[Tuple, List[Tuple[str, Tuple]]] = {}
@@ -69,8 +69,14 @@ def _build_reachability_graph_internal(net: PetriNet, max_states: int = 10000) -
     queue.append(initial_marking)
     visited.add(initial_tuple)
     nodes = {initial_tuple}
-    
-    while queue and len(nodes) < max_states:
+
+    while queue:
+        if len(nodes) >= max_states:
+            raise Exception(
+                f"Reachability graph vượt quá max_states={max_states}. "
+                f"Đồ thị có thể là vô hạn hoặc quá lớn."
+            )
+
         current_marking = queue.popleft()
         current_tuple = tuple(sorted(current_marking.items()))
         
@@ -217,20 +223,27 @@ def analyze_liveness(request: PetriNetRequest) -> BoundednessLivenessResult:
     unreachable_transitions = []
     live_transitions = []
     liveness_level = 4  # Mặc định là mức cao nhất
+    transition_liveness_levels = {}
     
     for transition, (is_dead, is_L1, is_L2, is_L3, is_L4) in liveness_table.items():
         if is_dead:
+            level = 0
             dead_transitions.append(transition)
             unreachable_transitions.append(transition)
             liveness_level = min(liveness_level, 0)  # Nếu có transition dead, liveness_level = 0
         elif is_L4:  # L4-live = fully live
+            level = 4
             live_transitions.append(transition)
         elif is_L3:
+            level = 3
             liveness_level = min(liveness_level, 3)
         elif is_L2:
+            level = 2
             liveness_level = min(liveness_level, 2)
         elif is_L1:
+            level = 1
             liveness_level = min(liveness_level, 1)
+        transition_liveness_levels[transition] = level
     
     # Petri net được coi là live nếu tất cả transitions đều L4-live
     is_live = len(live_transitions) == len(net.transitions) and len(dead_transitions) == 0
@@ -241,5 +254,6 @@ def analyze_liveness(request: PetriNetRequest) -> BoundednessLivenessResult:
         unbounded_places=[],
         is_live=is_live,
         liveness_level=liveness_level,
-        unreachable_transitions=unreachable_transitions
+        unreachable_transitions=unreachable_transitions,
+        transition_liveness_levels=transition_liveness_levels
     )

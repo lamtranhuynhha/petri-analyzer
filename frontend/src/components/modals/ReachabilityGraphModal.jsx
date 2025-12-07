@@ -1,6 +1,7 @@
 import React from 'react';
 import { FaTimes, FaSearchPlus, FaSearchMinus, FaExpand, FaDownload } from 'react-icons/fa';
 import usePetriNetStore from '../../hooks/usePetriNet';
+import {toast } from 'react-toastify';
 
 /**
  * Reachability Graph Modal - Hiển thị RG với zoom, pan, legend
@@ -32,8 +33,32 @@ const ReachabilityGraphModal = () => {
   const handleFit = () => setZoom(100);
   
   const handleExport = () => {
-    // Export RG as image
-    alert('Export RG functionality coming soon!');
+    if (!rgData) {
+      toast.error('Chưa có Reachability Graph. Vui lòng chạy phân tích trước.');
+      return;
+    }
+    if (!rgData.graph_image) {
+      toast.error('Reachability Graph chưa có hình ảnh. Vui lòng thử lại.');
+      return;
+    }
+
+    fetch(rgData.graph_image)
+      .then(res => res.blob())
+      .then(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `reachability-graph-${Date.now()}.svg`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        toast.success('Tải Reachability Graph về máy thành công!');
+      })
+      .catch(err => {
+        console.error('Lỗi khi tải RG:', err);
+        toast.error('Tải Reachability Graph thất bại.');
+      });
   };
   
   return (
@@ -76,7 +101,7 @@ const ReachabilityGraphModal = () => {
           
           <div className="flex items-center gap-2">
             <label className="flex items-center gap-2 text-sm cursor-pointer">
-              <input
+<input
                 type="checkbox"
                 checked={showLegend}
                 onChange={(e) => setShowLegend(e.target.checked)}
@@ -127,10 +152,6 @@ const ReachabilityGraphModal = () => {
                 <span>Deadlock</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-4 h-4 rounded-full bg-blue-500"></div>
-                <span>Current (simulation)</span>
-              </div>
-              <div className="flex items-center gap-2">
                 <span>→</span>
                 <span>Transitions</span>
               </div>
@@ -153,15 +174,23 @@ const ReachabilityGraphModal = () => {
             </div>
             {rgData.max_tokens && (
               <div>
-                <span className="text-gray-600">Max tokens:</span>{' '}
+<span className="text-gray-600">Max tokens:</span>{' '}
                 <span className="font-semibold">{rgData.max_tokens}</span>
               </div>
             )}
           </div>
         </div>
-        
-        {/* Close button */}
-        <div className="p-4 border-t flex justify-center">
+
+        {/* Close button + Open in new tab */}
+        <div className="p-4 border-t flex justify-end gap-2">
+          {rgData.graph_image && (
+            <button
+              onClick={() => window.open(rgData.graph_image, '_blank')}
+              className="btn btn-primary"
+            >
+              Mở trong cửa sổ mới
+            </button>
+          )}
           <button
             onClick={() => closeModal('reachabilityGraph')}
             className="btn-secondary"
@@ -169,11 +198,10 @@ const ReachabilityGraphModal = () => {
             Đóng
           </button>
         </div>
+
       </div>
     </div>
   );
 };
 
 export default ReachabilityGraphModal;
-
-
