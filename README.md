@@ -11,6 +11,10 @@ Dự án này được phát triển nhằm xây dựng một **công cụ trự
     Phát triển hệ thống mã nguồn mở, có thể mở rộng và tích hợp vào các dự án nghiên cứu sau này.
 ---
 
+## Demo
+
+- Frontend (Vercel): https://petrinet-analyzer.vercel.app/
+
 ### 📊 Phân tích
 - **Reachability Graph**: Xây dựng và hiển thị đồ thị khả đạt
 - **Deadlock Detection**: Phát hiện các trạng thái deadlock
