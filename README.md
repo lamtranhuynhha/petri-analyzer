@@ -13,7 +13,7 @@ Dự án này được phát triển nhằm xây dựng một **công cụ trự
 
 ## Demo
 
-- Frontend (Vercel): https://petrinet-analyzer.vercel.app/
+- Dùng thử công cụ tại: https://petrinet-analyzer.vercel.app/
 
 ### 📊 Phân tích
 - **Reachability Graph**: Xây dựng và hiển thị đồ thị khả đạt
